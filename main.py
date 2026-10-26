@@ -11,7 +11,7 @@ from database import (
 from prediction_service import predict_reading
 
 app = Flask(__name__)
-
+initialize_database()
 
 @app.route("/")
 def home():

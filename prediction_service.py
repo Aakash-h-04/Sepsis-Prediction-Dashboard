@@ -7,20 +7,12 @@ import pandas as pd
 
 
 # Existing ML project: read its artifacts without modifying them.
-ML_ROOT = Path(
-    r"C:\Users\prate\Downloads\Early_Sepsis_Prediction"
-)
+PROJECT_ROOT = Path(__file__).resolve().parent
+MODEL_ROOT = PROJECT_ROOT / "model"
 
-MODEL_PATH = (
-    ML_ROOT
-    / "module2_ml"
-    / "sensor_random_forest_pipeline.joblib"
-)
-METADATA_PATH = (
-    ML_ROOT
-    / "module2_ml"
-    / "sensor_model_metadata.json"
-)
+MODEL_PATH = MODEL_ROOT / "sensor_random_forest_pipeline.joblib"
+METADATA_PATH = MODEL_ROOT / "sensor_model_metadata.json"
+
 
 FEATURES = ["HR", "O2Sat", "Temp"]
 

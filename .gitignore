@@ -10,4 +10,4 @@ env/
 *.sqlite
 *.sqlite3
 
-.vscode/
+.vscode/combined_sepsis_data.csv

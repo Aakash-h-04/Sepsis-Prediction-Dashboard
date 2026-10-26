@@ -13,25 +13,16 @@ from lime.lime_tabular import LimeTabularExplainer
 # Configuration
 # --------------------------------------------------
 
-ML_ROOT = Path(
-    r"C:\Users\prate\Downloads\Early_Sepsis_Prediction"
-)
+PROJECT_ROOT = Path(__file__).resolve().parent
+MODEL_ROOT = PROJECT_ROOT / "model"
 
-DATASET_PATH = ML_ROOT / "combined_sepsis_data.csv"
-MODEL_PATH = (
-    ML_ROOT
-    / "module2_ml"
-    / "sensor_random_forest_pipeline.joblib"
-)
-METADATA_PATH = (
-    ML_ROOT
-    / "module2_ml"
-    / "sensor_model_metadata.json"
-)
+MODEL_PATH = MODEL_ROOT / "sensor_random_forest_pipeline.joblib"
+METADATA_PATH = MODEL_ROOT / "sensor_model_metadata.json"
+
 
 FEATURES = ["HR", "O2Sat", "Temp"]
 TARGET = "SepsisLabel"
-
+DATASET_PATH = PROJECT_ROOT / "combined_sepsis_data.csv"
 MIN_LIME_FIT_SCORE = 0.5
 _explanation_lock = Lock()
 

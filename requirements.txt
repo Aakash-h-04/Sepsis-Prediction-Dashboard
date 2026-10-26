@@ -1,0 +1,8 @@
+
+Flask
+gunicorn
+pandas
+scikit-learn==1.9.1
+joblib
+lime
+pyserial
