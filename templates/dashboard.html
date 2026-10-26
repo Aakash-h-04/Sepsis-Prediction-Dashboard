@@ -1,0 +1,345 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0B1120">
+
+    <title>Clinical Intelligence | Sepsis Monitoring</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 32 32" fill="none">
+                    <path d="M16 4V28M4 16H28"
+                          stroke="currentColor"
+                          stroke-width="3"
+                          stroke-linecap="round"/>
+                    <circle cx="16" cy="16" r="12"
+                            stroke="currentColor"
+                            stroke-width="1.5"/>
+                </svg>
+            </div>
+
+            <div class="brand-copy">
+                <p class="eyebrow">CLINICAL INTELLIGENCE</p>
+                <h1>Sepsis Monitor</h1>
+            </div>
+        </div>
+
+        <div class="topbar-meta">
+            <span class="environment-label">ENGINEERING PROTOTYPE</span>
+            <div class="api-indicator">
+                <span class="status-dot" id="apiDot"></span>
+                <span id="apiStatus">Checking backend</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-heading">
+            <div>
+                <p class="eyebrow">MONITORING / OVERVIEW</p>
+                <h2>Patient monitoring overview</h2>
+                <p class="page-description">
+                    Vital-sign observations and historical measurements.
+                </p>
+            </div>
+
+            <div class="updated-block">
+                <span class="muted-label">LATEST READING</span>
+                <strong id="lastUpdated">No readings available</strong>
+            </div>
+        </section>
+
+        <section class="section-block">
+            <div class="section-heading">
+                <div>
+                    <h3>Vital signs</h3>
+                    <p>Most recent values recorded in the database</p>
+                </div>
+                <span class="section-index">01 / OVERVIEW</span>
+            </div>
+
+            <div class="reading-grid">
+                <article class="reading-card heart-card">
+                    <div class="metric-topline">
+                        <div class="metric-icon heart-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"
+                                      stroke="currentColor"
+                                      stroke-width="1.6"
+                                      stroke-linejoin="round"/>
+                                <path d="M4.5 12h4l2-3.5 3.1 7 2-3.5h4"
+                                      stroke="currentColor"
+                                      stroke-width="1.6"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="metric-code">HR / 01</span>
+                    </div>
+
+                    <p class="reading-label">Heart rate</p>
+                    <p class="reading-value" id="bpmValue">
+                        {{ reading.bpm if reading else '--' }}
+                        <span>BPM</span>
+                    </p>
+                    <div class="metric-footer">
+                        <span>Pulse measurement</span>
+                        <span class="metric-accent heart-accent"></span>
+                    </div>
+                </article>
+
+                <article class="reading-card temperature-card">
+                    <div class="metric-topline">
+                        <div class="metric-icon temperature-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M14 14.8V5a3 3 0 0 0-6 0v9.8a5 5 0 1 0 6 0Z"
+                                      stroke="currentColor"
+                                      stroke-width="1.6"
+                                      stroke-linecap="round"/>
+                                <path d="M11 12v6"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <span class="metric-code">TEMP / 02</span>
+                    </div>
+
+                    <p class="reading-label">Body temperature</p>
+                    <p class="reading-value" id="temperatureValue">
+                        {{ reading.temperature if reading else '--' }}
+                        <span>°C</span>
+                    </p>
+                    <div class="metric-footer">
+                        <span>Temperature measurement</span>
+                        <span class="metric-accent temperature-accent"></span>
+                    </div>
+                </article>
+
+                <article class="reading-card oxygen-card">
+                    <div class="metric-topline">
+                        <div class="metric-icon oxygen-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M12 21s8-4.4 8-11a4.5 4.5 0 0 0-8-2.8A4.5 4.5 0 0 0 4 10c0 6.6 8 11 8 11Z"
+                                      stroke="currentColor"
+                                      stroke-width="1.6"
+                                      stroke-linejoin="round"/>
+                                <path d="M7.5 12h3l1.5-3 2.1 6 1.4-3h1"
+                                      stroke="currentColor"
+                                      stroke-width="1.5"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="metric-code">SPO2 / 03</span>
+                    </div>
+
+                    <p class="reading-label">Blood oxygen</p>
+                    <p class="reading-value" id="spo2Value">
+                        {{ reading.spo2 if reading else '--' }}
+                        <span>%</span>
+                    </p>
+                    <div class="metric-footer">
+                        <span>Oxygen saturation</span>
+                        <span class="metric-accent oxygen-accent"></span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="status-strip" aria-live="polite">
+            <div class="status-main">
+                <span class="status-dot" id="dataDot"></span>
+                <div>
+                    <strong id="dataStatus">Checking reading history</strong>
+                    <p id="dataDescription">
+                        Retrieving the latest stored observations.
+                    </p>
+                </div>
+            </div>
+
+            <div class="status-divider"></div>
+
+            <div class="status-stat">
+                <span class="muted-label">RECORDS RETRIEVED</span>
+                <strong id="recordCount">—</strong>
+            </div>
+
+            <div class="status-stat">
+                <span class="muted-label">DATA SOURCE</span>
+                <strong>SQLite history</strong>
+            </div>
+        </section>
+
+        <section class="section-block chart-section">
+            <div class="section-heading">
+                <div>
+                    <h3>Measurement history</h3>
+                    <p>Trends across recorded observations</p>
+                </div>
+                <span class="section-index">02 / TRENDS</span>
+            </div>
+
+            <div class="chart-panel">
+                <div class="chart-heading">
+                    <div>
+                        <h4>Vital-sign trends</h4>
+                        <p>Based on timestamps returned by the API</p>
+                    </div>
+
+                    <div class="chart-legend">
+                        <span><i class="legend-dot bpm-legend"></i>Heart rate</span>
+                        <span><i class="legend-dot temp-legend"></i>Temperature</span>
+                        <span><i class="legend-dot spo2-legend"></i>SpO₂</span>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="vitalsChart"
+                            role="img"
+                            aria-label="Historical chart of recorded heart rate, temperature and oxygen saturation">
+                    </canvas>
+                    <p class="chart-empty" id="chartEmpty">
+                        Waiting for recorded measurements.
+                    </p>
+                </div>
+
+                <div class="chart-footer">
+                    <span>Historical records only</span>
+                    <span id="chartRecordInfo">No chart data loaded</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block explanation-section">
+            <div class="section-heading">
+                <div>
+                    <h3>Explainable AI</h3>
+                    <p>Understand which sensor features influenced a model prediction</p>
+                </div>
+                <span class="section-index">03 / EXPLAINABILITY</span>
+            </div>
+
+            <div class="chart-panel explanation-panel">
+                <div class="explanation-controls">
+                    <div>
+                        <label for="explanationReadingId">Reading ID</label>
+                        <input
+                            type="number"
+                            id="explanationReadingId"
+                            min="1"
+                            step="1"
+                            placeholder="Enter a record ID"
+                        >
+                    </div>
+
+                    <button type="button" id="explainReadingButton">
+                        Explain reading
+                    </button>
+                </div>
+
+                <p id="explanationStatus" role="status" aria-live="polite">
+                    Select a saved reading to generate its LIME explanation.
+                </p>
+
+                <div id="explanationResults" hidden>
+                    <div class="explanation-summary">
+                        <div>
+                            <span class="muted-label">MODEL OUTPUT</span>
+                            <strong id="explanationPrediction">—</strong>
+                        </div>
+                        <div>
+                            <span class="muted-label">MODEL PROBABILITY</span>
+                            <strong id="explanationProbability">—</strong>
+                        </div>
+                        <div>
+                            <span class="muted-label">DECISION THRESHOLD</span>
+                            <strong id="explanationThreshold">—</strong>
+                        </div>
+                    </div>
+
+                    <h4>Feature contributions</h4>
+                    <p class="explanation-help">
+                        Positive weights support the risk-flag class.
+                        Negative weights oppose it. These are local LIME
+                        contributions, not changes in probability.
+                    </p>
+
+                    <div id="explanationFeatures"></div>
+
+                    <p id="explanationWarning" class="table-footnote"></p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block history-section">
+            <div class="section-heading">
+                <div>
+                    <h3>Recent readings</h3>
+                    <p>Stored observations, newest first</p>
+                </div>
+                <span class="section-index">04 / RECORDS</span>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Record</th>
+                            <th>Timestamp</th>
+                            <th>Heart rate</th>
+                            <th>Temperature</th>
+                            <th>SpO₂</th>
+                        </tr>
+                    </thead>
+                    <tbody id="readingsTableBody">
+                        {% if readings %}
+                            {% for item in readings %}
+                                <tr>
+                                    <td><span class="record-id">#{{ item.id }}</span></td>
+                                    <td>{{ item.timestamp }}</td>
+                                    <td>{{ item.bpm }} <span class="table-unit">BPM</span></td>
+                                    <td>{{ item.temperature }} <span class="table-unit">°C</span></td>
+                                    <td>{{ item.spo2 }}<span class="table-unit">%</span></td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="empty-table">
+                                    No readings recorded yet.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="table-footnote">
+                Values shown are stored measurements, not a clinical diagnosis.
+            </p>
+        </section>
+
+        <footer class="dashboard-footer">
+            <span>Early Sepsis Risk Prediction Using IoT and Explainable AI</span>
+            <span>Engineering prototype · Not for clinical decision-making</span>
+        </footer>
+    </main>
+
+<!--    <script>-->
+<!--        const API_URL = "/api/readings";-->
+<!--    </script>-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
