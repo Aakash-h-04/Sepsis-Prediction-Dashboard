@@ -149,22 +149,26 @@ def load_reference_data():
 # --------------------------------------------------
 
 model, metadata = load_artifacts()
-reference_data = load_reference_data()
 
-explainer = LimeTabularExplainer(
-    training_data=reference_data[FEATURES].to_numpy(
-        dtype=float
-    ),
-    feature_names=FEATURES,
-    class_names=[
-        "No sepsis risk flag",
-        "Sepsis risk flag",
-    ],
-    mode="classification",
-    discretize_continuous=True,
-    random_state=42,
-)
+if DATASET_PATH.is_file():
+    reference_data = load_reference_data()
 
+    explainer = LimeTabularExplainer(
+        training_data=reference_data[FEATURES].to_numpy(
+            dtype=float
+        ),
+        feature_names=FEATURES,
+        class_names=[
+            "No sepsis risk flag",
+            "Sepsis risk flag",
+        ],
+        mode="classification",
+        discretize_continuous=True,
+        random_state=42,
+    )
+else:
+    reference_data = None
+    explainer = None
 
 # --------------------------------------------------
 # Prediction adapter for LIME
@@ -230,6 +234,12 @@ def explain_reading(
     API input order: bpm, temperature, spo2.
     Model feature order: HR, O2Sat, Temp.
     """
+    
+    if explainer is None:
+        raise RuntimeError(
+            "LIME explanation is unavailable because the "
+            "training reference dataset is not deployed."
+        )
 
     values = {
         "HR": float(bpm),
