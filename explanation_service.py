@@ -240,6 +240,12 @@ def explain_reading(
             "LIME explanation is unavailable because the "
             "training reference dataset is not deployed."
         )
+    
+    if explainer is None:
+        raise RuntimeError(
+            "LIME explanation is unavailable because the "
+            "training reference dataset is not deployed."
+        )
 
     values = {
         "HR": float(bpm),
