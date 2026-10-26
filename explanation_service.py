@@ -22,7 +22,7 @@ METADATA_PATH = MODEL_ROOT / "sensor_model_metadata.json"
 
 FEATURES = ["HR", "O2Sat", "Temp"]
 TARGET = "SepsisLabel"
-# DATASET_PATH = PROJECT_ROOT / "combined_sepsis_data.csv"
+DATASET_PATH = PROJECT_ROOT / "combined_sepsis_data.csv"
 MIN_LIME_FIT_SCORE = 0.5
 _explanation_lock = Lock()
 
