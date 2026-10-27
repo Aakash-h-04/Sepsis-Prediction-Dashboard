@@ -1,3 +1,204 @@
-{% extends "site_base.html" %}{% block title %}Sepsis knowledge hub · SepsisSense{% endblock %}
-{% block content %}<section class="page-hero"><div class="container"><p class="eyebrow">PUBLIC AWARENESS</p><h1>Sepsis is a medical emergency. Understanding it matters.</h1><p>Learn the basics, recognize why timely medical assessment is important, and explore trusted public-health resources.</p></div></section>
-<section class="section"><div class="container content-layout"><article class="prose"><div class="callout"><div aria-hidden="true">!</div><div><strong>If sepsis is suspected, seek urgent medical care.</strong><p>Do not wait for an online tool, score, or chatbot to decide whether someone needs help.</p></div></div><h2>What is sepsis?</h2><p>Sepsis is a life-threatening condition that occurs when the body's response to an infection causes injury to its own tissues and organs. It can progress quickly and needs prompt medical assessment and treatment.</p><h2>How can it develop?</h2><p>An infection can trigger a dysregulated response that affects circulation, blood vessels, clotting, and organ function. The course varies across people and infections; no single symptom or vital sign can establish or exclude sepsis.</p><h2>Who may be at greater risk?</h2><p>Risk depends on factors such as age, underlying health conditions, immune status, recent severe illness or procedures, and the nature of the infection. Risk factors are not a diagnosis, and sepsis can affect people without an obvious pre-existing risk factor.</p><h2>What should people know?</h2><ul><li>Sepsis can follow different types of infection.</li><li>Warning signs may include confusion, difficulty breathing, severe discomfort, clammy skin, or feeling extremely unwell.</li><li>Symptoms vary; a list is not a reliable rule-out test.</li><li>Preventing infections, keeping recommended vaccinations up to date, wound care, and getting appropriate care for infections can reduce some risks.</li></ul><h2>Explore related topics</h2><p><a class="text-link" href="{{ url_for('sepsis_symptoms') }}">Warning signs and when to seek help →</a></p><p><a class="text-link" href="{{ url_for('sepsis_impact') }}">Public-health impact and awareness →</a></p><h2>Trusted sources</h2><p>Read the original guidance and its latest review date: <a href="https://www.who.int/news-room/fact-sheets/detail/sepsis" target="_blank" rel="noopener noreferrer">World Health Organization — Sepsis</a> and <a href="https://www.cdc.gov/sepsis/" target="_blank" rel="noopener noreferrer">US CDC — Sepsis</a>.</p></article><aside class="sidebar-card"><h3>On this page</h3><a href="#">What is sepsis?</a><a href="{{ url_for('sepsis_symptoms') }}">Warning signs</a><a href="{{ url_for('sources') }}">Source library</a><a href="{{ url_for('disclaimer') }}">Project disclaimer</a></aside></div></section>{% endblock %}
+{% extends "site_base.html" %}
+{% block title %}Sepsis Clinical Guide & Pathophysiology · SepsisSense{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">CLINICAL INTELLIGENCE & PATHOPHYSIOLOGY</span>
+    <h1>When the immune system turns against itself.</h1>
+    <p>
+      Sepsis is not a simple infection. It is a life-threatening, dysregulated host response that causes tissue damage, 
+      organ hypoperfusion, and septic shock.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Medical Emergency Callout -->
+    <div class="hero-note" style="margin-bottom: 30px;">
+      <span aria-hidden="true">🚨</span>
+      <div>
+        <strong>Critical Clinical Alert:</strong> Sepsis is a medical emergency requiring rapid hospital intervention. Every hour of delay increases mortality risk by 7.6%. If sepsis is suspected, dial <strong>112 / 911 / 999</strong> immediately.
+      </div>
+    </div>
+
+    <!-- 4 Visual Clinical Pillars -->
+    <div class="card-grid-2">
+      <!-- Pillar 1: The Pathophysiological Cascade -->
+      <div class="lab-card">
+        <span class="section-kicker">Mechanism</span>
+        <h3>The Dysregulated Cascade</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px;">
+          How a localized pathogen escalates into systemic multiorgan dysfunction:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--cyan-400);">
+            <strong style="color: var(--text-main); font-size: 0.9rem;">1. Infection & Pathogen Recognition</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim);">PAMPs (Pathogen-Associated Molecular Patterns) trigger innate toll-like receptors (TLRs) on immune cells.</p>
+          </div>
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--amber-400);">
+            <strong style="color: var(--text-main); font-size: 0.9rem;">2. Cytokine Storm & Inflammation</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim);">Massive release of pro-inflammatory mediators (TNF-α, IL-1β, IL-6) overrides compensatory anti-inflammatory signals.</p>
+          </div>
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--coral-400);">
+            <strong style="color: var(--text-main); font-size: 0.9rem;">3. Endothelial Degradation & Capillary Leak</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim);">The endothelial glycocalyx degrades, allowing plasma to leak into interstitial tissues, triggering profound arterial hypotension.</p>
+          </div>
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid #DC2626;">
+            <strong style="color: var(--text-main); font-size: 0.9rem;">4. Microvascular Thrombosis & Organ Hypoxia</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim);">Platelet activation triggers disseminated intravascular microclots, depriving vital organs of oxygen.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pillar 2: High-Risk Vulnerabilities -->
+      <div class="lab-card">
+        <span class="section-kicker">Epidemiology</span>
+        <h3>High-Risk Patient Populations</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px;">
+          Anyone can develop sepsis, but specific groups face drastically heightened vulnerability:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--text-main); font-size: 0.9rem;">Neonates & Children under 5</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Immature innate and adaptive immune responses</div>
+            </div>
+            <span class="pill" style="color: var(--coral-400); border-color: var(--coral-400); font-weight: 700;">40% Global Cases</span>
+          </div>
+
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--text-main); font-size: 0.9rem;">Adults Age 65 and Older</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Immunosenescence, polypharmacy, and co-morbidities</div>
+            </div>
+            <span class="pill" style="color: var(--amber-400); border-color: var(--amber-400); font-weight: 700;">High Mortality</span>
+          </div>
+
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--text-main); font-size: 0.9rem;">Immunocompromised Patients</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Chemotherapy, organ transplant, HIV/AIDS, steroids</div>
+            </div>
+            <span class="pill" style="color: var(--coral-400); border-color: var(--coral-400); font-weight: 700;">Critical Risk</span>
+          </div>
+
+          <div style="padding: 12px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: var(--text-main); font-size: 0.9rem;">Chronic Organ Disease</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Cirrhosis, chronic kidney disease (CKD), diabetes, COPD</div>
+            </div>
+            <span class="pill" style="color: var(--cyan-400); border-color: var(--cyan-400); font-weight: 700;">Reduced Reserve</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Infection Sites & Golden Hour Protocol -->
+    <div class="card-grid-2" style="margin-top: 30px;">
+      <!-- Infection Sites Breakdown -->
+      <div class="lab-card">
+        <span class="section-kicker">Clinical Etiology</span>
+        <h3>Primary Infection Origins</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
+          Distribution of primary anatomical infection sites precipitating sepsis:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+              <span>🫁 Respiratory Tract (Pneumonia / Lung Infection)</span>
+              <strong style="color: var(--cyan-400);">~50%</strong>
+            </div>
+            <div style="width: 100%; height: 8px; background: var(--bg-surface-elevated); border-radius: 4px; overflow: hidden;">
+              <div style="width: 50%; height: 100%; background: var(--cyan-400);"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+              <span>🫘 Genitourinary Tract (UTI / Pyelonephritis)</span>
+              <strong style="color: var(--teal-400);">~20%</strong>
+            </div>
+            <div style="width: 100%; height: 8px; background: var(--bg-surface-elevated); border-radius: 4px; overflow: hidden;">
+              <div style="width: 20%; height: 100%; background: var(--teal-400);"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+              <span>🩺 Intra-Abdominal (Peritonitis / Appendicitis)</span>
+              <strong style="color: var(--amber-400);">~15%</strong>
+            </div>
+            <div style="width: 100%; height: 8px; background: var(--bg-surface-elevated); border-radius: 4px; overflow: hidden;">
+              <div style="width: 15%; height: 100%; background: var(--amber-400);"></div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+              <span>🩹 Skin & Soft Tissue (Cellulitis / Wound Infection)</span>
+              <strong style="color: var(--coral-400);">~10%</strong>
+            </div>
+            <div style="width: 100%; height: 8px; background: var(--bg-surface-elevated); border-radius: 4px; overflow: hidden;">
+              <div style="width: 10%; height: 100%; background: var(--coral-400);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Golden Hour Sepsis-6 Bundle -->
+      <div class="lab-card">
+        <span class="section-kicker">Emergency Resuscitation</span>
+        <h3>The Golden Hour: Sepsis Six Protocol</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px;">
+          The internationally recognized resuscitation bundle to be initiated within 60 minutes:
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm);">
+            <strong style="color: var(--teal-400); font-size: 0.85rem;">1. High-Flow Oxygen</strong>
+            <p style="margin: 4px 0 0; font-size: 0.78rem; color: var(--text-dim);">Titrate to target SpO₂ 94–98% (or 88–92% in COPD).</p>
+          </div>
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm);">
+            <strong style="color: var(--teal-400); font-size: 0.85rem;">2. Blood Cultures</strong>
+            <p style="margin: 4px 0 0; font-size: 0.78rem; color: var(--text-dim);">Draw microbiological cultures before antimicrobial therapy.</p>
+          </div>
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm);">
+            <strong style="color: var(--coral-400); font-size: 0.85rem;">3. IV Antibiotics</strong>
+            <p style="margin: 4px 0 0; font-size: 0.78rem; color: var(--text-dim);">Administer broad-spectrum intravenous antimicrobials.</p>
+          </div>
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm);">
+            <strong style="color: var(--coral-400); font-size: 0.85rem;">4. IV Fluid Resuscitation</strong>
+            <p style="margin: 4px 0 0; font-size: 0.78rem; color: var(--text-dim);">Rapid crystalloid bolus (30 mL/kg) for hypotension or lactate ≥4.</p>
+          </div>
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm);">
+            <strong style="color: var(--amber-400); font-size: 0.85rem;">5. Serum Lactate</strong>
+            <p style="margin: 4px 0 0; font-size: 0.78rem; color: var(--text-dim);">Check arterial or venous lactate to detect tissue hypoperfusion.</p>
+          </div>
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm);">
+            <strong style="color: var(--amber-400); font-size: 0.85rem;">6. Strict Urine Output</strong>
+            <p style="margin: 4px 0 0; font-size: 0.78rem; color: var(--text-dim);">Catheterize to monitor renal perfusion (&gt;0.5 mL/kg/h).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Links -->
+    <div style="margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('sepsis_symptoms') }}" class="btn btn-primary">
+        Identify Sepsis Warning Signs (SEPSIS) →
+      </a>
+      <a href="{{ url_for('biology_lab') }}" class="btn btn-teal">
+        Explore 6-Organ Dysfunction in Biology Lab →
+      </a>
+      <a href="{{ url_for('sepsis_impact') }}" class="btn btn-ghost">
+        View Global Burden & Epidemiology →
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

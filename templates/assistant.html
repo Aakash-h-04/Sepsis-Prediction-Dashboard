@@ -1,2 +1,148 @@
-{% extends "site_base.html" %}{% block title %}AI guide · SepsisSense{% endblock %}
-{% block content %}<section class="page-hero"><div class="container"><p class="eyebrow">MULTILINGUAL AI GUIDE</p><h1>A guide for sepsis education and project questions.</h1><p>Ask general educational questions about sepsis, or switch to project mode for questions about this repository's architecture and ML experiment.</p></div></section><section class="section"><div class="container"><div class="assistant-layout"><section class="lab-panel assistant-shell"><div class="assistant-top"><div class="avatar" id="assistantAvatar" aria-label="Animated AI avatar"><div class="avatar-face"><span class="avatar-eyes"><i></i><i></i></span><span class="avatar-mouth" id="avatarMouth"></span></div><span class="avatar-label">AI GUIDE</span></div><div><h2 style="margin-bottom:4px">SepsisSense Guide</h2><p class="helper" style="margin-top:0">Educational assistant · not a clinician</p><span class="pill {% if assistant_configured %}pill-live{% else %}pill-warning{% endif %}">{% if assistant_configured %}Provider configured{% else %}Text AI provider not configured{% endif %}</span></div></div><div class="assistant-controls"><div class="field"><label for="assistantMode">Assistant mode</label><select id="assistantMode"><option value="education">Sepsis education</option><option value="project">Project consultant</option></select></div><div class="field"><label for="assistantLanguage">Language</label><select id="assistantLanguage"><option value="en">English</option><option value="hi">हिन्दी — Hindi</option><option value="ta">தமிழ் — Tamil</option><option value="kn">ಕನ್ನಡ — Kannada</option></select></div></div><div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-bubble assistant-bubble"><strong>Welcome</strong><p>I can explain the project's technical architecture or help with general sepsis education. Live AI answers require server-side provider configuration. Do not use this assistant to diagnose or rule out sepsis.</p></div></div><div class="voice-row"><button class="btn btn-ghost btn-small" id="voiceInputButton" type="button">🎙 Speak question</button><button class="btn btn-ghost btn-small" id="stopSpeechButton" type="button">■ Stop audio</button><span class="helper" id="voiceStatus">Voice support depends on your browser and installed voices.</span></div><form id="assistantForm"><label class="field"><span class="helper">Your question</span><textarea id="assistantMessage" rows="3" maxlength="4000" required placeholder="Ask about sepsis biology, model metrics, Flask APIs, or ESP32 data flow…"></textarea></label><div class="assistant-submit"><span class="helper">Up to 4,000 characters. Avoid personal medical information.</span><button class="btn" id="assistantSendButton" type="submit">Send question →</button></div></form><p id="assistantError" class="assistant-error" role="status"></p></section><aside class="sidebar-card"><h3>Try a question</h3><button class="prompt-chip" data-prompt="Explain the difference between precision and recall using this project's test metrics.">Explain precision vs recall</button><button class="prompt-chip" data-prompt="Explain the existing ESP32 to Flask to Random Forest data flow.">Explain the project architecture</button><button class="prompt-chip" data-prompt="Why can't normal-looking vital signs rule out sepsis?">Why vital signs cannot rule out sepsis</button><button class="prompt-chip" data-prompt="Explain the biology of sepsis in simple terms.">Explain sepsis biology simply</button><div class="callout" style="margin-top:20px"><div>!</div><div><strong>Safety first</strong><p>If sepsis is suspected or someone is seriously unwell, seek urgent professional medical assessment rather than waiting for a chatbot response.</p></div></div><p class="helper" style="margin-top:18px">{% if assistant_configured %}The server reports an LLM API key and model. Provider availability is confirmed only when a request succeeds.{% else %}To enable model-generated answers, set <code>LLM_API_KEY</code> and <code>LLM_MODEL</code> on the server. No credentials are required for the rest of the website.{% endif %}</p></aside></div></div></section>{% endblock %}{% block scripts %}<script src="{{ url_for('static', filename='js/assistant.js') }}" defer></script>{% endblock %}
+{% extends "site_base.html" %}
+{% block title %}Multilingual AI Guide · SepsisSense{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">MULTILINGUAL CONVERSATIONAL INTELLIGENCE</span>
+    <h1>SepsisSense AI Guide</h1>
+    <p>
+      An intelligent clinical education and systems architecture companion. Ask questions about sepsis pathophysiology, 
+      vital sign interpretation, or project engineering across 4 languages.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="assistant-layout">
+      <!-- Main Chat Interface Shell -->
+      <div class="lab-card assistant-shell" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <!-- Chat Header -->
+        <div class="assistant-top" style="padding: 20px 24px; background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div class="avatar" id="assistantAvatar" aria-label="Animated AI avatar">
+              <div class="avatar-face">
+                <span class="avatar-eyes"><i></i><i></i></span>
+                <span class="avatar-mouth" id="avatarMouth"></span>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-main);">SepsisSense Guide</h3>
+                <span class="pill {% if assistant_configured %}pill-live{% else %}pill-warning{% endif %}">
+                  {% if assistant_configured %}
+                    🟢 Live AI Online ({{ llm_model or 'gpt-4o-mini' }})
+                  {% else %}
+                    🟡 Clinical Knowledge Base (Curated Fallback)
+                  {% endif %}
+                </span>
+              </div>
+              <p style="margin: 3px 0 0; font-size: 0.78rem; color: var(--text-dim);">
+                Educational & technical assistant · Strict non-diagnostic safety guardrails
+              </p>
+            </div>
+          </div>
+
+          <!-- Controls: Mode & Language -->
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="assistantMode" class="form-control" style="font-size: 0.85rem; padding: 6px 10px; min-width: 140px;">
+              <option value="education">Sepsis Education</option>
+              <option value="project">Project Architect</option>
+            </select>
+
+            <select id="assistantLanguage" class="form-control" style="font-size: 0.85rem; padding: 6px 10px; min-width: 130px;">
+              <option value="en">English</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="kn">ಕನ್ನಡ (Kannada)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Chat Message Log -->
+        <div class="chat-messages" id="chatMessages" style="padding: 24px; min-height: 380px; max-height: 520px; overflow-y: auto;" aria-live="polite">
+          <div class="chat-bubble assistant-bubble">
+            <strong style="color: var(--cyan-400); display: block; margin-bottom: 6px;">SepsisSense Intelligence Guide</strong>
+            <p style="margin: 0; line-height: 1.6; color: var(--text-main);">
+              Hello! I am your interactive sepsis and project intelligence guide. Ask me about the biological cascade of sepsis, 
+              vital signs and organ failure, the Scikit-learn Random Forest pipeline, or ESP32 telemetry ingestion.
+            </p>
+            <div style="margin-top: 10px; font-size: 0.75rem; color: var(--text-dim); border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+              ⚠️ Safety Protocol: I provide scientific education, not medical diagnoses. If you suspect an acute emergency, dial 112 / 911 / 999.
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio & Voice Control Bar -->
+        <div style="padding: 10px 24px; background: rgba(6, 11, 20, 0.6); border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-ghost btn-small" id="voiceInputButton" type="button" title="Speak through microphone">
+              🎙️ Speak Question
+            </button>
+            <button class="btn btn-ghost btn-small" id="stopSpeechButton" type="button" title="Stop speech synthesis">
+              ⏹️ Stop Audio
+            </button>
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-dim);" id="voiceStatus">
+            Voice synthesis active (browser Web Speech API)
+          </span>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="assistantForm" style="padding: 18px 24px; background: var(--bg-surface-elevated); border-top: 1px solid var(--border-subtle);">
+          <div style="display: flex; gap: 12px; align-items: flex-end;">
+            <div style="flex: 1;">
+              <textarea id="assistantMessage" rows="2" maxlength="4000" class="form-control" required 
+                        placeholder="Ask about sepsis biology, model metrics, Flask APIs, or ESP32 telemetry flow…" 
+                        style="resize: none; font-size: 0.92rem;"></textarea>
+            </div>
+            <button class="btn btn-primary" id="assistantSendButton" type="submit" style="padding: 12px 22px; height: 50px;">
+              Send →
+            </button>
+          </div>
+          <p id="assistantError" class="assistant-error" role="status" style="margin: 8px 0 0; color: var(--coral-400); font-size: 0.82rem;"></p>
+        </form>
+      </div>
+
+      <!-- Quick Prompt Suggestions Sidebar -->
+      <div class="sidebar-card" style="display: flex; flex-direction: column; gap: 16px;">
+        <span class="section-kicker">Recommended Prompts</span>
+        <h3 style="margin: 0; font-size: 1.1rem;">Suggested Inquiries</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+          Click any prompt chip to insert it into the question box:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button class="prompt-chip" data-prompt="Explain the difference between precision and recall using this project's test metrics.">
+            📊 Precision vs. Recall Trade-Off
+          </button>
+          <button class="prompt-chip" data-prompt="Why did the engineers select a 0.01 threshold instead of the typical 0.50 cutoff?">
+            🎯 Decision Threshold 0.01 Rationale
+          </button>
+          <button class="prompt-chip" data-prompt="Explain the end-to-end data pipeline from the ESP32 Wi-Fi microcontroller to Flask and Random Forest.">
+            ⚡ ESP32 to Cloud Pipeline
+          </button>
+          <button class="prompt-chip" data-prompt="Why do normal-looking vital signs not rule out impending sepsis?">
+            🩺 Why Normal Vitals Don't Rule Out Sepsis
+          </button>
+          <button class="prompt-chip" data-prompt="Explain the cellular biology of sepsis, cytokine storms, and capillary leak.">
+            🧬 Cellular Pathophysiology Explained
+          </button>
+        </div>
+
+        <div class="hero-note" style="margin-top: auto; padding: 14px;">
+          <span aria-hidden="true">🛡️</span>
+          <div style="font-size: 0.8rem; line-height: 1.5;">
+            <strong>Autonomous Resilience:</strong> The assistant is equipped with auto-fallback to verified clinical literature should LLM network timeouts occur.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/assistant.js') }}" defer></script>
+{% endblock %}

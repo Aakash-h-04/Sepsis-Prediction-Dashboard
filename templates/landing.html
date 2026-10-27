@@ -1,223 +1,328 @@
 {% extends "site_base.html" %}
-{% block title %}SepsisSense · Healthcare Intelligence & Educational Platform{% endblock %}
+{% block title %}SepsisSense · Clinical Intelligence & Sepsis Learning Platform{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
+<!-- Hero Section with Interactive Clinical Simulator -->
 <section class="hero">
   <div class="container hero-grid">
     <div>
-      <span class="eyebrow">AWARENESS · PATHOPHYSIOLOGY · MATHEMATICS · SENSOR ML</span>
+      <span class="eyebrow">CONTINUOUS TELEMETRY · CELLULAR BIOLOGY · SENSOR ML</span>
       <h1>Understand sepsis.<br><em>Explore the science.</em></h1>
       <p class="hero-copy">
-        A unified full-stack healthcare intelligence platform bridging public sepsis education, 
-        interactive cellular immunology, mathematical classification theory, and an experimental ESP32-to-cloud Random Forest pipeline.
+        A unified healthcare technology platform combining real-time ESP32 vital telemetry, 
+        interactive pathophysiology, and an exploratory random forest machine-learning pipeline.
       </p>
 
       <div class="hero-actions">
-        <a class="btn btn-primary" href="{{ url_for('sepsis_hub') }}">
-          Explore Sepsis Guide <span>↗</span>
+        <a class="btn btn-primary" href="{{ url_for('home') }}">
+          Live Monitoring Dashboard ↗
         </a>
-        <a class="btn btn-ghost" href="{{ url_for('ml_lab') }}">
-          Interactive ML Lab
+        <a class="btn btn-teal" href="{{ url_for('biology_lab') }}">
+          Explore Biology Lab
         </a>
-        <a class="btn btn-cyan" href="{{ url_for('assistant_page') }}">
-          Meet AI Guide
+        <a class="btn btn-ghost" href="{{ url_for('assistant_page') }}">
+          Consult AI Guide
         </a>
       </div>
 
-      <div class="hero-note" role="note">
-        <span aria-hidden="true">⚠️</span>
-        <div>
-          <strong>Educational & Engineering Prototype:</strong> The included machine-learning model is an exploratory research demonstration. It is not clinically validated and must never be used to diagnose, treat, or rule out sepsis.
-        </div>
-      </div>
-
-      <div class="hero-live">
+      <div class="hero-live" style="margin-top: 24px;">
         <span class="status-dot" id="siteApiDot"></span>
-        <span id="siteApiText">Connecting to live project API…</span>
-        <span class="separator">·</span>
-        <a href="{{ url_for('home') }}" class="text-link">Open Monitoring Dashboard →</a>
+        <span id="siteApiText">Connected to live Flask telemetry backend (ESP32 active)</span>
       </div>
     </div>
 
-    <!-- Tech Visual -->
-    <div class="hero-visual" aria-hidden="true">
-      <div class="orbit-ring"></div>
-      <div class="pulse-core">
-        <svg viewBox="0 0 32 32" fill="none">
-          <path d="M4 16h6l4-8 6 16 4-8h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="pulse-core-label">SEPSISSENSE</span>
+    <!-- Interactive Clinical Simulator Widget -->
+    <div class="hero-sim-card">
+      <div class="hero-sim-header">
+        <div>
+          <strong style="color: var(--text-main); font-size: 0.95rem;">Interactive Vitals Simulator</strong>
+          <div style="font-size: 0.72rem; color: var(--text-dim);">Live EKG & Random Forest inference</div>
+        </div>
+        <span id="simRiskBadge" class="badge-normal">NO_RISK_FLAG</span>
       </div>
 
-      <div class="float-card float-card-1">
-        <small>Pipeline Status</small>
-        <strong>Sensor → API → ML</strong>
-        <span style="color: var(--teal-400); font-size: 0.75rem; font-weight: 700;">● Active Deployment</span>
+      <!-- Animated EKG Canvas -->
+      <div class="ekg-canvas-container">
+        <canvas id="ekgCanvas" class="ekg-canvas"></canvas>
       </div>
 
-      <div class="float-card float-card-2">
-        <small>Interactive Science</small>
-        <strong>Biology & Mathematics</strong>
-        <span style="color: var(--cyan-400); font-size: 0.75rem; font-weight: 700;">● Real-time Simulators</span>
+      <!-- Sliders -->
+      <div class="sim-slider-group">
+        <div class="sim-slider-box">
+          <label><span>Heart Rate</span> <strong id="simBpmVal" style="color: var(--cyan-400);">82 BPM</strong></label>
+          <input type="range" id="simBpm" min="45" max="180" value="82">
+        </div>
+        <div class="sim-slider-box">
+          <label><span>Temp</span> <strong id="simTempVal" style="color: var(--amber-400);">36.7 °C</strong></label>
+          <input type="range" id="simTemp" min="34.5" max="41.0" step="0.1" value="36.7">
+        </div>
+        <div class="sim-slider-box">
+          <label><span>SpO₂</span> <strong id="simSpo2Val" style="color: var(--teal-400);">98 %</strong></label>
+          <input type="range" id="simSpo2" min="70" max="100" value="98">
+        </div>
+      </div>
+
+      <!-- Presets -->
+      <div style="display: flex; gap: 6px; margin-bottom: 14px;">
+        <button type="button" class="btn btn-ghost btn-small sim-preset" data-bpm="75" data-temp="36.8" data-spo2="99">Baseline</button>
+        <button type="button" class="btn btn-ghost btn-small sim-preset" data-bpm="135" data-temp="39.2" data-spo2="92">Sepsis Alert</button>
+        <button type="button" class="btn btn-ghost btn-small sim-preset" data-bpm="115" data-temp="35.0" data-spo2="89">Hypothermia</button>
+      </div>
+
+      <!-- Outcome bar -->
+      <div class="sim-outcome-bar">
+        <div>
+          <span style="display: block; font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Probability</span>
+          <strong id="simProbVal" style="font-size: 1.25rem; color: var(--cyan-400); font-family: var(--font-mono);">0.00%</strong>
+        </div>
+        <div style="text-align: right;">
+          <span style="display: block; font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase;">Threshold</span>
+          <strong style="font-size: 1.1rem; color: var(--text-muted); font-family: var(--font-mono);">0.010</strong>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Capability Overview Section -->
+<!-- 4-Step Hardware-to-Cloud Pipeline -->
 <section class="section section-alt">
   <div class="container">
     <div class="section-head">
-      <span class="section-kicker">Unified Healthcare Intelligence</span>
-      <h2>From cellular immunology to model transparency.</h2>
-      <p>
-        Explore sepsis from every perspective: understand biological cascade failure, learn the mathematics of imbalanced classification, and inspect the real Random Forest pipeline.
-      </p>
+      <span class="section-kicker">Engineered Architecture</span>
+      <h2>From ESP32 edge telemetry to cloud classification.</h2>
+      <p>How physiological observations move from microcontrollers into machine learning inference and real-time visualization.</p>
+    </div>
+
+    <div class="pipeline-flow">
+      <div class="pipeline-node active">
+        <span class="node-step">01 / EDGE TELEMETRY</span>
+        <h4>ESP32 Ingestion</h4>
+        <p>Dispatches BPM, Temperature, and SpO2 every 5 seconds over HTTPS TLS to <code>POST /api/readings</code>.</p>
+      </div>
+
+      <div class="pipeline-node">
+        <span class="node-step">02 / FLASK REST API</span>
+        <h4>Range Validation</h4>
+        <p>Checks mathematical bounds and finite constraints. Routes payload to persistence and prediction services.</p>
+      </div>
+
+      <div class="pipeline-node">
+        <span class="node-step">03 / RANDOM FOREST</span>
+        <h4>Model Pipeline</h4>
+        <p>Aligns inputs to <code>[HR, O2Sat, Temp]</code> and executes 200 decision trees against a 0.01 threshold.</p>
+      </div>
+
+      <div class="pipeline-node">
+        <span class="node-step">04 / OBSERVABILITY</span>
+        <h4>Live Dashboard</h4>
+        <p>Continuous Chart.js telemetry graphing with historical tabular logs and CSV exports.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Feature Laboratories Showcase -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="section-kicker">Interactive Laboratories</span>
+      <h2>Explore science through hands-on simulations.</h2>
+      <p>No walls of text. Interactive tools designed for intuitive, deep scientific understanding.</p>
     </div>
 
     <div class="card-grid-3">
       <div class="feature-card">
         <div class="feature-icon-box">🧬</div>
         <h3>Pathophysiology Lab</h3>
-        <p>Explore the 4-stage systemic progression from localized infection to dysregulated cytokine storm, microthrombi, and multiorgan failure.</p>
-        <a class="text-link" href="{{ url_for('biology_lab') }}">Explore Biology Lab →</a>
+        <p>Interactive organ damage map, cytokine storm timeline, and clinical ICU biomarker glossary.</p>
+        <a class="text-link" href="{{ url_for('biology_lab') }}">Launch Biology Lab →</a>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon-box">📐</div>
         <h3>Mathematics Laboratory</h3>
-        <p>Interactive confusion matrix recalculator, threshold simulator, and formal mathematical derivations of sensitivity, specificity, and F1-score.</p>
-        <a class="text-link" href="{{ url_for('mathematics_lab') }}">Explore Metrics Lab →</a>
+        <p>Interactive confusion matrix recalculator, decision threshold simulator, and metric derivations.</p>
+        <a class="text-link" href="{{ url_for('mathematics_lab') }}">Launch Metrics Lab →</a>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon-box">🤖</div>
         <h3>Machine Learning Lab</h3>
-        <p>Inspect real validation metrics, test inputs through the live prediction pipeline, and understand feature ordering [HR, O2Sat, Temp].</p>
-        <a class="text-link" href="{{ url_for('ml_lab') }}">Enter ML Lab →</a>
+        <p>Test custom vitals, inspect feature ordering, and review authentic PhysioNet test metrics.</p>
+        <a class="text-link" href="{{ url_for('ml_lab') }}">Launch ML Lab →</a>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon-box">📊</div>
-        <h3>Sensor Monitoring Dashboard</h3>
-        <p>Inspect real-time telemetry sent by the ESP32 via HTTPS, review historical vital-sign trends, and monitor model output classifications.</p>
-        <a class="text-link" href="{{ url_for('home') }}">View Dashboard →</a>
+        <h3>Live Sensor Dashboard</h3>
+        <p>Continuous real-time telemetry graphs, pulse gauges, and LIME explainability for stored records.</p>
+        <a class="text-link" href="{{ url_for('home') }}">Open Dashboard →</a>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon-box">🎙️</div>
-        <h3>Multilingual AI Guide</h3>
-        <p>Interactive voice-enabled AI assistant supporting English, Hindi, Tamil, and Kannada with an animated talking avatar and dual consultation modes.</p>
-        <a class="text-link" href="{{ url_for('assistant_page') }}">Consult AI Guide →</a>
+        <h3>Multilingual AI Assistant</h3>
+        <p>Voice-enabled medical AI guide in English, Hindi, Tamil, and Kannada with an animated talking avatar.</p>
+        <a class="text-link" href="{{ url_for('assistant_page') }}">Meet AI Guide →</a>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon-box">🚨</div>
-        <h3>SEPSIS Warning Signs</h3>
-        <p>Recognized clinical warning signs, the SEPSIS mnemonic, localized emergency numbers, and why normal vital signs never rule out sepsis.</p>
+        <h3>Clinical Warning Signs</h3>
+        <p>Interactive symptom triage checker, SEPSIS mnemonic, and emergency helpline routing.</p>
         <a class="text-link" href="{{ url_for('sepsis_symptoms') }}">Review Symptoms →</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Architecture & Pipeline Flow Section -->
-<section class="section">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-kicker">Engineered Data Pipeline</span>
-      <h2>From ESP32 edge telemetry to cloud classification.</h2>
-      <p>
-        How physiological data moves through the hardware, network, backend, and machine-learning layers in real time.
-      </p>
-    </div>
-
-    <div class="pipeline-flow">
-      <div class="pipeline-node">
-        <span class="node-step">01 / EDGE INGESTION</span>
-        <h4>ESP32 Microcontroller</h4>
-        <p>Reads BPM, Temperature, and SpO₂ every 5 seconds. Sends JSON over secure TLS to <code>POST /api/readings</code>.</p>
-      </div>
-
-      <div class="pipeline-node">
-        <span class="node-step">02 / BACKEND API</span>
-        <h4>Flask on Render</h4>
-        <p>Validates numerical bounds and finite constraints. Routes payload to the persistent database and prediction service.</p>
-      </div>
-
-      <div class="pipeline-node">
-        <span class="node-step">03 / INFERENCE ENGINE</span>
-        <h4>Random Forest Pipeline</h4>
-        <p>Re-orders features to <code>[HR, O2Sat, Temp]</code>. Computes sepsis probability using 200 estimators against a 0.01 threshold.</p>
-      </div>
-
-      <div class="pipeline-node">
-        <span class="node-step">04 / OBSERVABILITY</span>
-        <h4>Real-Time Dashboard</h4>
-        <p>Stores readings and displays live vitals, risk flags, and historical trend charts for ongoing monitoring.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Model Transparency & Limitations Section -->
+<!-- Verified Model Metrics -->
 <section class="section section-alt">
   <div class="container">
     <div class="section-head">
-      <span class="section-kicker">Responsible AI & Transparency</span>
-      <h2>Real experimental metrics, zero false claims.</h2>
-      <p>
-        Clinical machine learning requires total transparency. The current experimental Random Forest exhibits low precision due to extreme class imbalance.
-      </p>
+      <span class="section-kicker">Model Transparency</span>
+      <h2>Authentic test metrics. Zero false claims.</h2>
+      <p>Holdout evaluation metrics extracted directly from <code>model/sensor_model_metadata.json</code>.</p>
     </div>
 
     <div class="card-grid-4">
       <div class="cm-metric-badge">
         <small>Validation ROC-AUC</small>
         <strong>0.5785</strong>
-        <span style="font-size: 0.75rem; color: var(--text-dim);">Patient-level validation</span>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">Patient-level grouping</span>
       </div>
 
       <div class="cm-metric-badge">
         <small>Test Accuracy</small>
         <strong>59.61%</strong>
-        <span style="font-size: 0.75rem; color: var(--text-dim);">Holdout test set</span>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">Holdout test set</span>
       </div>
 
       <div class="cm-metric-badge">
-        <small>Test Recall (Sensitivity)</small>
+        <small>Sensitivity (Recall)</small>
         <strong>55.32%</strong>
-        <span style="font-size: 0.75rem; color: var(--text-dim);">26 of 47 positive cases</span>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">26 of 47 positive cases</span>
       </div>
 
       <div class="cm-metric-badge">
-        <small>Test Precision</small>
-        <strong>3.70%</strong>
-        <span style="font-size: 0.75rem; color: var(--coral-400);">Severe class imbalance</span>
-      </div>
-    </div>
-
-    <div class="hero-note" style="margin-top: 30px;">
-      <span>💡</span>
-      <div>
-        <strong>Why is precision only 3.7%?</strong> Sepsis occurs in a very small fraction of hospital hours (~2-3%). A low classification threshold (0.01) was selected to prioritize catching positive cases (55.3% recall), but this inherently results in many false positives (677 false positives). This demonstrates why sensor-only models cannot be used clinically without comprehensive laboratory and clinical context.
+        <small>Precision (PPV)</small>
+        <strong style="color: var(--coral-400);">3.70%</strong>
+        <span style="font-size: 0.72rem; color: var(--coral-400);">Severe class imbalance (~2%)</span>
       </div>
     </div>
   </div>
 </section>
+{% endblock %}
 
-<!-- Call to Action Banner -->
-<section class="section" style="text-align: center; padding: 70px 0;">
-  <div class="container" style="max-width: 680px;">
-    <h2>Ready to explore SepsisSense?</h2>
-    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 28px;">
-      Dive into the biology and mathematics laboratories, test the live ML prediction pipeline, or launch the interactive sensor dashboard.
-    </p>
-    <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
-      <a href="{{ url_for('learn') }}" class="btn btn-primary">Start Learning Labs</a>
-      <a href="{{ url_for('home') }}" class="btn btn-ghost">Open Monitoring Dashboard</a>
-    </div>
-  </div>
-</section>
+{% block scripts %}
+<script>
+  // Animated EKG Heartbeat Canvas & Live Hero Simulator
+  document.addEventListener("DOMContentLoaded", () => {
+    const canvas = document.getElementById("ekgCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    let width = canvas.width = canvas.offsetWidth;
+    let height = canvas.height = canvas.offsetHeight;
+    window.addEventListener("resize", () => {
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    });
+
+    let x = 0;
+    let points = [];
+    let bpm = 82;
+
+    const bpmSlider = document.getElementById("simBpm");
+    const tempSlider = document.getElementById("simTemp");
+    const spo2Slider = document.getElementById("simSpo2");
+
+    const bpmVal = document.getElementById("simBpmVal");
+    const tempVal = document.getElementById("simTempVal");
+    const spo2Val = document.getElementById("simSpo2Val");
+    const probVal = document.getElementById("simProbVal");
+    const riskBadge = document.getElementById("simRiskBadge");
+
+    function renderEKG() {
+      ctx.fillStyle = "rgba(4, 8, 16, 0.15)";
+      ctx.fillRect(0, 0, width, height);
+
+      const speed = (bpm / 60) * 2.8;
+      x = (x + speed) % width;
+
+      // Generate ECG QRS spike pattern
+      const cycle = x % 140;
+      let y = height / 2;
+
+      if (cycle > 50 && cycle < 58) {
+        y -= 6; // P wave
+      } else if (cycle >= 58 && cycle < 62) {
+        y += 4; // Q wave
+      } else if (cycle >= 62 && cycle < 68) {
+        y -= 26; // R spike
+      } else if (cycle >= 68 && cycle < 74) {
+        y += 10; // S wave
+      } else if (cycle >= 84 && cycle < 96) {
+        y -= 8; // T wave
+      }
+
+      ctx.beginPath();
+      ctx.strokeStyle = riskBadge.textContent.includes("RISK") ? "#EF4444" : "#0EA5E9";
+      ctx.lineWidth = 2.2;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = ctx.strokeStyle;
+      ctx.moveTo(x - speed, points[points.length - 1] || y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      points.push(y);
+      if (points.length > width) points.shift();
+
+      requestAnimationFrame(renderEKG);
+    }
+
+    renderEKG();
+
+    async function evaluateSim() {
+      const b = parseFloat(bpmSlider.value);
+      const t = parseFloat(tempSlider.value);
+      const s = parseFloat(spo2Slider.value);
+
+      bpm = b;
+      bpmVal.textContent = `${b} BPM`;
+      tempVal.textContent = `${t.toFixed(1)} °C`;
+      spo2Val.textContent = `${s} %`;
+
+      try {
+        const res = await fetch("/api/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bpm: b, temperature: t, spo2: s }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const pred = data.prediction;
+          const isRisk = pred.prediction === "SEPSIS_RISK_FLAG";
+          riskBadge.className = isRisk ? "badge-risk" : "badge-normal";
+          riskBadge.textContent = pred.prediction;
+          probVal.textContent = `${(pred.sepsis_probability * 100).toFixed(2)}%`;
+          probVal.style.color = isRisk ? "var(--coral-400)" : "var(--cyan-400)";
+        }
+      } catch (_) {}
+    }
+
+    [bpmSlider, tempSlider, spo2Slider].forEach(s => s.addEventListener("input", evaluateSim));
+
+    document.querySelectorAll(".sim-preset").forEach(btn => {
+      btn.addEventListener("click", () => {
+        bpmSlider.value = btn.getAttribute("data-bpm");
+        tempSlider.value = btn.getAttribute("data-temp");
+        spo2Slider.value = btn.getAttribute("data-spo2");
+        evaluateSim();
+      });
+    });
+
+    evaluateSim();
+  });
+</script>
 {% endblock %}

@@ -48,8 +48,8 @@ MODEL_METADATA_PATH = PROJECT_ROOT / "model" / "sensor_model_metadata.json"
 # Initialize persistence layer and ensure default demo user and device exist
 db.initialize_database()
 
-# Seed initial evaluator account if no users exist
-if db.count_users() == 0:
+# Ensure evaluator account always exists for demo access
+if not db.get_user_by_email("evaluator@sepsissense.org"):
     db.create_user(
         email="evaluator@sepsissense.org",
         password_hash=generate_password_hash("DemoAccess2026!"),
@@ -162,8 +162,10 @@ def ml_lab():
 @app.route("/assistant")
 @app.route("/app/assistant")
 def assistant_page():
-    llm_configured = bool(os.getenv("LLM_API_KEY") and os.getenv("LLM_MODEL"))
-    return render_template("assistant.html", assistant_configured=llm_configured)
+    llm_key = (os.getenv("LLM_API_KEY") or "").strip().strip("'\"")
+    llm_model = (os.getenv("LLM_MODEL") or "gpt-4o-mini").strip().strip("'\"")
+    llm_configured = bool(llm_key)
+    return render_template("assistant.html", assistant_configured=llm_configured, llm_model=llm_model)
 
 
 @app.route("/status")
@@ -738,27 +740,55 @@ def save_quiz():
 
 @app.route("/api/test-notification", methods=["POST"])
 def api_test_notification():
-    channel = request.form.get("channel", "email")
+    is_json = request.is_json
+    payload = request.get_json(silent=True) or {} if is_json else request.form
+
+    channel = payload.get("channel", "whatsapp")
+    recipient = (payload.get("recipient") or payload.get("whatsapp_number") or payload.get("email_address") or "").strip()
+
     user = session.get("user", {})
     user_id = user.get("id")
 
-    if channel == "email":
-        recipient = user.get("email") or "researcher@example.com"
-        res = send_email_notification(
-            to_email=recipient,
-            subject="Diagnostic Test Ping",
-            body_html="<p>This is a verified test notification from SepsisSense.</p>",
-            body_text="This is a verified test notification from SepsisSense.",
+    # If recipient not given directly, check user database preferences
+    if not recipient and user_id:
+        prefs = db.get_user_notification_prefs(user_id)
+        if prefs:
+            recipient = prefs.get("whatsapp_number") if channel == "whatsapp" else prefs.get("email_address")
+
+    if channel == "whatsapp":
+        if not recipient:
+            recipient = os.getenv("TWILIO_TEST_RECIPIENT", "")
+        if not recipient:
+            err_msg = "Please provide a valid WhatsApp phone number (with country code, e.g. +91... or +1...)."
+            if is_json:
+                return jsonify({"success": False, "error": err_msg}), 400
+            flash(err_msg, "error")
+            return redirect(url_for("app_settings"))
+
+        res = send_whatsapp_notification(
+            to_number=recipient,
+            message_text="[SepsisSense Alert Test] Connected! Twilio WhatsApp delivery successfully verified from your SepsisSense platform.",
             user_id=user_id,
         )
     else:
-        recipient = "+1234567890"
-        res = send_whatsapp_notification(
-            to_number=recipient,
-            message_text="[SepsisSense] Diagnostic test ping from server.",
+        if not recipient:
+            recipient = user.get("email") or os.getenv("SMTP_USER") or "alerts@sepsissense.org"
+        res = send_email_notification(
+            to_email=recipient,
+            subject="[SepsisSense] Diagnostic Test Notification",
+            body_html="<h3>SepsisSense Diagnostic Test</h3><p>Your notification pipeline is successfully configured.</p>",
+            body_text="[SepsisSense] Your notification pipeline is successfully configured.",
             user_id=user_id,
         )
 
+    if is_json:
+        status_code = 200 if res.get("success") else 400
+        return jsonify(res), status_code
+
+    if res.get("success"):
+        flash(f"Test {channel} sent successfully to {recipient}!", "success")
+    else:
+        flash(f"Test failed: {res.get('error')}", "error")
     return redirect(url_for("app_settings"))
 
 

@@ -1,2 +1,106 @@
-{% extends "site_base.html" %}{% block title %}Learning labs · SepsisSense{% endblock %}
-{% block content %}<section class="page-hero"><div class="container"><p class="eyebrow">INTERACTIVE LEARNING</p><h1>Learn the biology. Understand the mathematics. Inspect the model.</h1><p>Short learning paths and hands-on tools connect medical concepts with the engineering and statistics behind this experimental project.</p></div></section><section class="section"><div class="container"><div class="feature-grid"><article class="feature-card"><div class="feature-icon">✚</div><h3>Biology laboratory</h3><p>Explore immune response, inflammation, organ dysfunction, and the limits of using vital signs in isolation.</p><a class="text-link" href="{{ url_for('biology_lab') }}">Start biology lab →</a></article><article class="feature-card"><div class="feature-icon">∑</div><h3>Mathematics laboratory</h3><p>Change the confusion matrix and calculate classification metrics live. Learn how thresholds affect error trade-offs.</p><a class="text-link" href="{{ url_for('mathematics_lab') }}">Start mathematics lab →</a></article><article class="feature-card"><div class="feature-icon">▦</div><h3>Machine learning laboratory</h3><p>Inspect verified metadata and send a sample to the actual deployed prediction endpoint without storing a new reading.</p><a class="text-link" href="{{ url_for('ml_lab') }}">Start ML lab →</a></article></div><div class="callout" style="margin-top:24px"><div>ⓘ</div><div><strong>Educational, not clinical</strong><p>These tools explain concepts and software behavior. They do not diagnose sepsis or replace professional care.</p></div></div></div></section>{% endblock %}
+{% extends "site_base.html" %}
+{% block title %}Interactive Learning Hub · Biology, Mathematics & ML Labs{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">SCIENTIFIC & CLINICAL LEARNING</span>
+    <h1>Interactive Laboratories & Learning Hub</h1>
+    <p>
+      Bridging clinical pathophysiology, classification mathematics, and applied sensor machine learning. 
+      Select a laboratory below to begin hands-on exploration.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="card-grid-3">
+      <!-- Lab 1: Biology -->
+      <div class="lab-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">🧬</div>
+          <span class="section-kicker">Module 01 · Immunology</span>
+          <h3 style="margin-top: 4px;">Biology & Organ Dysfunction Lab</h3>
+          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+            Interactive anatomy explorer covering the 6 primary organ failures in sepsis: CNS encephalopathy, ARDS, septic shock, acute kidney injury, microthrombosis (DIC), and capillary leak.
+          </p>
+          <div style="margin: 16px 0; display: flex; flex-wrap: wrap; gap: 6px;">
+            <span class="badge-normal" style="font-size: 0.72rem;">6 Organ Systems</span>
+            <span class="badge-normal" style="font-size: 0.72rem;">Biomarkers</span>
+            <span class="badge-normal" style="font-size: 0.72rem;">Interactive Quiz</span>
+          </div>
+        </div>
+        <a href="{{ url_for('biology_lab') }}" class="btn btn-teal btn-small" style="width: 100%; text-align: center; margin-top: 14px;">
+          Launch Biology Lab →
+        </a>
+      </div>
+
+      <!-- Lab 2: Mathematics -->
+      <div class="lab-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">📐</div>
+          <span class="section-kicker">Module 02 · Statistics</span>
+          <h3 style="margin-top: 4px;">Mathematics & Metrics Lab</h3>
+          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+            Explore classification statistics under extreme class imbalance. Adjust confusion matrix cells in real time, calculate precision/recall/F1, and simulate threshold trade-offs.
+          </p>
+          <div style="margin: 16px 0; display: flex; flex-wrap: wrap; gap: 6px;">
+            <span class="badge-normal" style="font-size: 0.72rem;">Confusion Matrix</span>
+            <span class="badge-normal" style="font-size: 0.72rem;">Threshold Slider</span>
+            <span class="badge-normal" style="font-size: 0.72rem;">Bayesian Odds</span>
+          </div>
+        </div>
+        <a href="{{ url_for('mathematics_lab') }}" class="btn btn-teal btn-small" style="width: 100%; text-align: center; margin-top: 14px;">
+          Launch Mathematics Lab →
+        </a>
+      </div>
+
+      <!-- Lab 3: ML -->
+      <div class="lab-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 12px;">🤖</div>
+          <span class="section-kicker">Module 03 · Applied AI</span>
+          <h3 style="margin-top: 4px;">Machine Learning Lab</h3>
+          <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+            Inspect the live Scikit-Learn Random Forest pipeline. Test vital signs with real-time EKG animation, feature importance mapping [HR, O2Sat, Temp], and test preset patient cases.
+          </p>
+          <div style="margin: 16px 0; display: flex; flex-wrap: wrap; gap: 6px;">
+            <span class="badge-normal" style="font-size: 0.72rem;">Live Inference</span>
+            <span class="badge-normal" style="font-size: 0.72rem;">EKG Canvas</span>
+            <span class="badge-normal" style="font-size: 0.72rem;">Interview Guide</span>
+          </div>
+        </div>
+        <a href="{{ url_for('ml_lab') }}" class="btn btn-teal btn-small" style="width: 100%; text-align: center; margin-top: 14px;">
+          Launch ML Lab →
+        </a>
+      </div>
+    </div>
+
+    <!-- Additional Clinical Learning Modules -->
+    <div class="card-grid-2" style="margin-top: 30px;">
+      <div class="lab-card">
+        <span class="section-kicker">Clinical Recognition</span>
+        <h3>Interactive Sepsis Triage Tool</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
+          Test yourself on the SEPSIS warning sign mnemonic and calculate acute clinical urgency in real time.
+        </p>
+        <a href="{{ url_for('sepsis_symptoms') }}" class="btn btn-primary btn-small">
+          Open Triage Calculator →
+        </a>
+      </div>
+
+      <div class="lab-card">
+        <span class="section-kicker">Multilingual AI</span>
+        <h3>SepsisSense AI Guide</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px;">
+          Conversational agent available in English, Hindi, Tamil, and Kannada to answer questions on sepsis biology and architecture.
+        </p>
+        <a href="{{ url_for('assistant_page') }}" class="btn btn-ghost btn-small">
+          Ask AI Guide →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

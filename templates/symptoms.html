@@ -1,2 +1,166 @@
-{% extends "site_base.html" %}{% block title %}Sepsis warning signs · SepsisSense{% endblock %}
-{% block content %}<section class="page-hero"><div class="container"><p class="eyebrow">KNOW THE WARNING SIGNS</p><h1>Do not wait for every symptom to appear.</h1><p>Sepsis can look different from person to person. Warning signs are educational information, not a self-diagnosis checklist.</p></div></section><section class="section"><div class="container content-layout"><article class="prose"><div class="callout"><div aria-hidden="true">!</div><div><strong>Suspected sepsis or a person who is seriously unwell needs urgent medical assessment.</strong><p>Contact local emergency services or seek urgent care. Do not delay to complete an online form or ask a chatbot.</p></div></div><h2>Possible warning signs</h2><ul><li>New confusion, disorientation, or difficulty staying awake.</li><li>Difficulty breathing or unusually rapid breathing.</li><li>Severe discomfort, pain, or a feeling of being extremely unwell.</li><li>Clammy or sweaty skin.</li><li>Rapid heart rate or a weak pulse.</li><li>Fever, shivering, feeling very cold, or unusually low body temperature.</li><li>Very little urine or other signs of serious deterioration.</li></ul><p>These signs can also occur in other illnesses. Only a qualified medical professional can assess the situation using the overall clinical context and appropriate examinations or tests.</p><h2>Why vital-sign values are not enough</h2><p>Heart rate, temperature, and oxygen saturation can be influenced by many conditions, devices, activity, medication, measurement error, and individual variation. A model using only these inputs cannot replace clinical assessment.</p><h2>What this project can and cannot do</h2><p>The current SepsisSense model is an experimental engineering demonstration with weak evaluation metrics and no clinical validation. It must not be used to screen, diagnose, treat, or rule out sepsis.</p></article><aside class="sidebar-card"><h3>Further reading</h3><a href="https://www.who.int/news-room/fact-sheets/detail/sepsis" target="_blank" rel="noopener noreferrer">WHO Sepsis fact sheet ↗</a><a href="https://www.cdc.gov/sepsis/" target="_blank" rel="noopener noreferrer">CDC Sepsis ↗</a><a href="{{ url_for('sepsis_hub') }}">Sepsis knowledge hub</a></aside></div></section>{% endblock %}
+{% extends "site_base.html" %}
+{% block title %}Sepsis Warning Signs & Triage · SepsisSense{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">RECOGNITION & TRIAGE</span>
+    <h1>Interactive Sepsis Triage & Warning Signs</h1>
+    <p>Sepsis symptoms can appear subtly. Use this interactive tool to identify warning signs and assess immediate urgency.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="lab-layout">
+      <!-- Interactive Triage Tool -->
+      <div class="feature-card">
+        <span class="section-kicker">Interactive Triage</span>
+        <h3>Symptom Urgency Calculator</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+          Select any symptoms present in yourself or the person you are observing:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+          <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); cursor: pointer;">
+            <input type="checkbox" class="triage-check" style="width: 18px; height: 18px; accent-color: var(--cyan-400);">
+            <div>
+              <strong style="color: var(--text-main);">S — Shivering, severe chills, or high fever</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Violent shaking or unusually low temperature (&lt;36°C)</div>
+            </div>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); cursor: pointer;">
+            <input type="checkbox" class="triage-check" style="width: 18px; height: 18px; accent-color: var(--cyan-400);">
+            <div>
+              <strong style="color: var(--text-main);">E — Extreme pain or general physical discomfort</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Worst pain ever experienced across joints or body</div>
+            </div>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); cursor: pointer;">
+            <input type="checkbox" class="triage-check" style="width: 18px; height: 18px; accent-color: var(--cyan-400);">
+            <div>
+              <strong style="color: var(--text-main);">P — Pale, discolored, or clammy/mottled skin</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Blueish lips, patchy coloration, cool extremities</div>
+            </div>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); cursor: pointer;">
+            <input type="checkbox" class="triage-check" style="width: 18px; height: 18px; accent-color: var(--cyan-400);">
+            <div>
+              <strong style="color: var(--text-main);">S — Sleepy, difficult to wake, or mental confusion</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Slurred speech, disorientation, severe lethargy</div>
+            </div>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); cursor: pointer;">
+            <input type="checkbox" class="triage-check" style="width: 18px; height: 18px; accent-color: var(--cyan-400);">
+            <div>
+              <strong style="color: var(--text-main);">I — "I feel like I might die"</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Severe, unexplained feeling of impending doom</div>
+            </div>
+          </label>
+
+          <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); cursor: pointer;">
+            <input type="checkbox" class="triage-check" style="width: 18px; height: 18px; accent-color: var(--cyan-400);">
+            <div>
+              <strong style="color: var(--text-main);">S — Shortness of breath or rapid breathing</strong>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Panting or breathing over 22 times per minute</div>
+            </div>
+          </label>
+        </div>
+
+        <div id="triageResult" style="padding: 16px; border-radius: var(--radius-md); background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: var(--text-dim);">Triage Assessment</div>
+          <div id="triageText" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main); margin-top: 4px;">
+            Select symptoms above to calculate urgency.
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Matrix -->
+      <div class="feature-card">
+        <span class="section-kicker">Clinical Differential</span>
+        <h3>Common Infection vs. Sepsis Emergency</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+          Key signs that differentiate common viral illnesses from emergent systemic deterioration.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border-left: 3px solid var(--teal-400);">
+            <strong style="color: var(--text-main); font-size: 0.95rem;">Alertness & Cognition</strong>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.82rem;">
+              <span style="color: var(--text-dim);">Common Flu: Tired, headache</span>
+              <span style="color: var(--coral-400); font-weight: 700;">Sepsis: Slurred speech, acute confusion</span>
+            </div>
+          </div>
+
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border-left: 3px solid var(--teal-400);">
+            <strong style="color: var(--text-main); font-size: 0.95rem;">Respiratory Pattern</strong>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.82rem;">
+              <span style="color: var(--text-dim);">Common Flu: Cough, nasal congestion</span>
+              <span style="color: var(--coral-400); font-weight: 700;">Sepsis: Rapid shallow panting (&gt;22/min)</span>
+            </div>
+          </div>
+
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border-left: 3px solid var(--teal-400);">
+            <strong style="color: var(--text-main); font-size: 0.95rem;">Circulation & Skin</strong>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.82rem;">
+              <span style="color: var(--text-dim);">Common Flu: Warm, flushed skin</span>
+              <span style="color: var(--coral-400); font-weight: 700;">Sepsis: Mottled, patchy, cold extremities</span>
+            </div>
+          </div>
+
+          <div style="padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border-left: 3px solid var(--teal-400);">
+            <strong style="color: var(--text-main); font-size: 0.95rem;">Urinary Output</strong>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 0.82rem;">
+              <span style="color: var(--text-dim);">Common Flu: Mildly reduced</span>
+              <span style="color: var(--coral-400); font-weight: 700;">Sepsis: No urine for over 12 hours (AKI)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const checks = document.querySelectorAll(".triage-check");
+    const resultBox = document.getElementById("triageResult");
+    const resultText = document.getElementById("triageText");
+
+    function evaluateTriage() {
+      let count = 0;
+      checks.forEach(c => { if (c.checked) count++; });
+
+      if (count === 0) {
+        resultBox.style.borderColor = "var(--border-subtle)";
+        resultBox.style.background = "var(--bg-surface-elevated)";
+        resultText.style.color = "var(--text-main)";
+        resultText.textContent = "Select symptoms above to calculate urgency.";
+      } else if (count === 1) {
+        resultBox.style.borderColor = "rgba(245, 158, 11, 0.4)";
+        resultBox.style.background = "rgba(245, 158, 11, 0.08)";
+        resultText.style.color = "var(--amber-400)";
+        resultText.innerHTML = "⚠️ <strong>1 Symptom Selected:</strong> Monitor closely. If an infection is present and symptoms worsen, consult a doctor.";
+      } else if (count === 2) {
+        resultBox.style.borderColor = "rgba(245, 158, 11, 0.6)";
+        resultBox.style.background = "rgba(245, 158, 11, 0.12)";
+        resultText.style.color = "var(--amber-400)";
+        resultText.innerHTML = "⚠️ <strong>Moderate Suspicion (2 Symptoms):</strong> Seek urgent medical consultation immediately. Mention 'Could this be sepsis?' to clinical staff.";
+      } else {
+        resultBox.style.borderColor = "rgba(239, 68, 68, 0.8)";
+        resultBox.style.background = "rgba(239, 68, 68, 0.15)";
+        resultText.style.color = "var(--coral-400)";
+        resultText.innerHTML = "🚨 <strong>CRITICAL EMERGENCY (" + count + " Symptoms):</strong> CALL EMERGENCY SERVICES (112 / 911 / 999) OR GO TO AN EMERGENCY ROOM IMMEDIATELY.";
+      }
+    }
+
+    checks.forEach(c => c.addEventListener("change", evaluateTriage));
+  });
+</script>
+{% endblock %}

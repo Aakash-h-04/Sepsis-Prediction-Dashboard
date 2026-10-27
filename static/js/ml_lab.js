@@ -15,11 +15,79 @@ document.addEventListener("DOMContentLoaded", () => {
   const probBarLabel = document.getElementById("probBarLabel");
   const warningEl = document.getElementById("predictionWarning");
 
+  // 0. Animated EKG Canvas
+  const canvas = document.getElementById("mlEkgCanvas");
+  let currentBpm = 82;
+  let isRiskState = false;
+
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    let width = (canvas.width = canvas.offsetWidth || 360);
+    let height = (canvas.height = canvas.offsetHeight || 90);
+
+    window.addEventListener("resize", () => {
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    });
+
+    let x = 0;
+    let points = [];
+
+    function renderEKG() {
+      ctx.fillStyle = "rgba(4, 8, 16, 0.15)";
+      ctx.fillRect(0, 0, width, height);
+
+      const speed = (currentBpm / 60) * 2.8;
+      x = (x + speed) % width;
+
+      const cycle = x % 140;
+      let y = height / 2;
+
+      if (cycle > 50 && cycle < 58) {
+        y -= 6;
+      } else if (cycle >= 58 && cycle < 62) {
+        y += 4;
+      } else if (cycle >= 62 && cycle < 68) {
+        y -= 26;
+      } else if (cycle >= 68 && cycle < 74) {
+        y += 10;
+      } else if (cycle >= 84 && cycle < 96) {
+        y -= 8;
+      }
+
+      ctx.beginPath();
+      ctx.strokeStyle = isRiskState ? "#EF4444" : "#0EA5E9";
+      ctx.lineWidth = 2.2;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = ctx.strokeStyle;
+      ctx.moveTo(x - speed, points[points.length - 1] || y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+
+      points.push(y);
+      if (points.length > width) points.shift();
+
+      requestAnimationFrame(renderEKG);
+    }
+
+    renderEKG();
+
+    if (bpmInput) {
+      bpmInput.addEventListener("input", () => {
+        const val = parseFloat(bpmInput.value);
+        if (!isNaN(val) && val > 30) currentBpm = val;
+      });
+    }
+  }
+
   // 1. Preset Buttons
   const presetBtns = document.querySelectorAll(".preset-btn");
   presetBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (bpmInput) bpmInput.value = btn.getAttribute("data-bpm");
+      if (bpmInput) {
+        bpmInput.value = btn.getAttribute("data-bpm");
+        currentBpm = parseFloat(bpmInput.value);
+      }
       if (tempInput) tempInput.value = btn.getAttribute("data-temp");
       if (spo2Input) spo2Input.value = btn.getAttribute("data-spo2");
       // Trigger submission
@@ -62,6 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
         resultContainer.style.display = "block";
 
         const isRisk = pred.prediction === "SEPSIS_RISK_FLAG";
+        isRiskState = isRisk;
+        currentBpm = bpm;
         badge.className = isRisk ? "badge-risk" : "badge-normal";
         badge.textContent = pred.prediction;
 

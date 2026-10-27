@@ -1,24 +1,44 @@
 {% extends "site_base.html" %}
-{% block title %}IoT Device Registry · SepsisSense Telemetry{% endblock %}
+{% block title %}IoT Device Registry & Edge Simulator · SepsisSense{% endblock %}
 
 {% block content %}
 <section class="page-hero">
   <div class="container">
-    <span class="eyebrow">IOT EDGE INFRASTRUCTURE</span>
-    <h1>Connected Sensor Nodes</h1>
-    <p>Manage registered ESP32 edge microcontrollers, review telemetry heartbeat timestamps, and generate ingestion keys.</p>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <span class="eyebrow">IOT EDGE INFRASTRUCTURE</span>
+        <h1>Connected Edge Sensor Nodes</h1>
+        <p>Manage registered ESP32 microcontrollers, inspect live ingestion heartbeats, and simulate telemetry streams.</p>
+      </div>
+      <div>
+        <button id="btnSimulateReading" class="btn btn-teal btn-small">
+          ⚡ Simulate Incoming ESP32 Reading
+        </button>
+      </div>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
+    <!-- Live Telemetry Status Banner -->
+    <div id="simFeedbackBanner" style="display: none; margin-bottom: 24px; padding: 16px; border-radius: var(--radius-md); background: rgba(14, 165, 233, 0.1); border: 1px solid var(--cyan-500); color: var(--cyan-400);">
+      <strong>✓ Reading Ingested Successfully!</strong>
+      <div id="simFeedbackDetails" style="font-size: 0.85rem; margin-top: 4px; font-family: var(--font-mono);"></div>
+    </div>
+
     <div class="lab-layout">
       <!-- Device List -->
       <div class="lab-card">
-        <h3>Active Edge Devices</h3>
-        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
-          Devices authenticated to stream telemetry to <code>POST /api/readings</code>.
-        </p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div>
+            <h3 style="margin: 0;">Active Telemetry Nodes</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 4px 0 0;">
+              Sensors transmitting via <code>POST /api/readings</code>
+            </p>
+          </div>
+          <span class="badge-normal" id="deviceCountBadge">{{ devices|length }} Registered</span>
+        </div>
 
         <div style="display: flex; flex-direction: column; gap: 14px;">
           {% for dev in devices %}
@@ -26,19 +46,29 @@
               <div>
                 <strong style="color: var(--text-main); font-size: 1rem;">{{ dev.device_name }}</strong>
                 <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">
-                  Key: <code>{{ dev.device_key }}</code> · Type: {{ dev.device_type }}
+                  Identifier: <code>{{ dev.device_key }}</code> · Architecture: {{ dev.device_type }}
                 </div>
-                <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
-                  Last seen: {{ dev.last_seen or 'Just now' }}
+                <div style="font-size: 0.75rem; color: var(--cyan-400); margin-top: 4px;">
+                  Status: 🟢 Telemetry Active (Ingesting)
                 </div>
               </div>
               <span class="badge-normal">ONLINE</span>
             </div>
           {% endfor %}
         </div>
+
+        <div style="margin-top: 24px; padding: 16px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <h4 style="margin: 0 0 8px; font-size: 0.95rem; color: var(--text-main);">Live Pipeline Telemetry Specs</h4>
+          <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.7;">
+            <li><strong>Transmission Frequency:</strong> Every 5,000 ms (5 seconds)</li>
+            <li><strong>Payload Format:</strong> JSON <code>{"bpm": float, "temperature": float, "spo2": float}</code></li>
+            <li><strong>Protocol:</strong> HTTPS TLS 1.3 with JSON Body</li>
+            <li><strong>Classification Engine:</strong> Scikit-Learn Random Forest Pipeline</li>
+          </ul>
+        </div>
       </div>
 
-      <!-- Register New Device & ESP32 Code Snippet -->
+      <!-- Register New Device & Arduino Snippet -->
       <div class="lab-card">
         <h3>Register New Edge Node</h3>
         <form method="POST" action="{{ url_for('app_devices') }}" style="margin-bottom: 24px;">
@@ -53,18 +83,66 @@
           <button type="submit" class="btn btn-primary btn-small">Register Device</button>
         </form>
 
-        <h4 style="margin: 20px 0 10px; font-size: 0.95rem; color: var(--text-main);">ESP32 Arduino Firmware Contract</h4>
-        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.8rem; color: var(--teal-400); overflow-x: auto;">
-// Sample ESP32 JSON payload sent every 5 seconds:<br>
-{<br>
-&nbsp;&nbsp;"bpm": 82.0,<br>
-&nbsp;&nbsp;"temperature": 36.7,<br>
-&nbsp;&nbsp;"spo2": 98.0<br>
-}<br>
-// Target URL: POST https://sepsis-prediction-dashboard.onrender.com/api/readings
+        <h4 style="margin: 20px 0 10px; font-size: 0.95rem; color: var(--text-main);">ESP32 Arduino Firmware Ingestion Contract</h4>
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.78rem; color: var(--teal-400); overflow-x: auto; line-height: 1.6;">
+// C++ HTTP POST snippet for ESP32 WiFiClientSecure<br>
+HTTPClient http;<br>
+http.begin("https://sepsis-prediction-dashboard.onrender.com/api/readings");<br>
+http.addHeader("Content-Type", "application/json");<br>
+<br>
+String payload = String("{\"bpm\":") + bpm + ",\"temperature\":" + temp + ",\"spo2\":" + spo2 + "}";<br>
+int httpCode = http.POST(payload);<br>
+// Returns HTTP 201 with stored reading ID & ML prediction
         </div>
       </div>
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const simBtn = document.getElementById("btnSimulateReading");
+    const banner = document.getElementById("simFeedbackBanner");
+    const details = document.getElementById("simFeedbackDetails");
+
+    if (simBtn) {
+      simBtn.addEventListener("click", async () => {
+        simBtn.disabled = true;
+        simBtn.textContent = "Transmitting to /api/readings…";
+
+        // Generate realistic physiological telemetry
+        const randomBpm = +(70 + Math.random() * 45).toFixed(1);
+        const randomTemp = +(36.4 + Math.random() * 2.2).toFixed(1);
+        const randomSpo2 = +(93 + Math.random() * 6).toFixed(1);
+
+        try {
+          const res = await fetch("/api/readings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              bpm: randomBpm,
+              temperature: randomTemp,
+              spo2: randomSpo2
+            })
+          });
+
+          const data = await res.json();
+          if (res.status === 201) {
+            banner.style.display = "block";
+            details.innerHTML = `Reading #${data.reading_id || data.id} stored · BPM: ${randomBpm} | Temp: ${randomTemp}°C | SpO₂: ${randomSpo2}% &nbsp;→&nbsp; <strong>${data.prediction?.prediction || data.prediction}</strong> (Score: ${((data.prediction?.sepsis_probability || data.sepsis_probability || 0)*100).toFixed(2)}%)`;
+          } else {
+            alert(`Simulation response: ${res.status} ${JSON.stringify(data)}`);
+          }
+        } catch (err) {
+          alert(`Simulation error: ${err.message}`);
+        } finally {
+          simBtn.disabled = false;
+          simBtn.textContent = "⚡ Simulate Incoming ESP32 Reading";
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

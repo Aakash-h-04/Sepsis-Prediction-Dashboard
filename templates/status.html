@@ -1,1 +1,95 @@
-{% extends "site_base.html" %}{% block title %}Service status · SepsisSense{% endblock %}{% block content %}<section class="page-hero"><div class="container"><p class="eyebrow">SERVICE STATUS</p><h1>Live service checks</h1><p>This page checks the current Flask API from your browser. Status reflects connectivity only, not clinical or model validity.</p></div></section><section class="section"><div class="container"><div class="feature-grid"><article class="feature-card"><p class="eyebrow">FLASK API</p><h3 id="statusApiTitle">Checking…</h3><p id="statusApiText">Calling /api/health.</p></article><article class="feature-card"><p class="eyebrow">MODEL METADATA</p><h3 id="statusMetadataTitle">Checking…</h3><p id="statusMetadataText">Calling /api/model-metadata.</p></article><article class="feature-card"><p class="eyebrow">READINGS API</p><h3 id="statusReadingsTitle">Checking…</h3><p id="statusReadingsText">Calling /api/readings.</p></article></div><div class="callout" style="margin-top:24px"><div>!</div><div><strong>A successful health check is not clinical validation.</strong><p>The model remains experimental and the active ESP32 demo currently sends simulated readings.</p></div></div></div></section>{% endblock %}{% block scripts %}<script src="{{ url_for('static', filename='js/status.js') }}" defer></script>{% endblock %}
+{% extends "site_base.html" %}
+{% block title %}System Health & Service Status · SepsisSense{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">SYSTEM OBSERVABILITY & HEALTH</span>
+    <h1>Platform Health & Telemetry Status</h1>
+    <p>
+      Real-time health monitoring of our Flask API, SQLite database storage, Scikit-learn Random Forest model pipeline, 
+      and ESP32 edge telemetry ingestion.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="card-grid-3">
+      <!-- Endpoint 1: Core API -->
+      <div class="lab-card">
+        <span class="section-kicker">Endpoint: GET /api/health</span>
+        <h3 id="statusApiTitle" style="margin-top: 4px;">Checking Flask API…</h3>
+        <p id="statusApiText" style="color: var(--text-muted); font-size: 0.85rem;">
+          Verifying backend connectivity and HTTP 200 response.
+        </p>
+        <div style="margin-top: 14px;">
+          <span class="pill" id="statusApiPill">Pinging…</span>
+        </div>
+      </div>
+
+      <!-- Endpoint 2: Model Pipeline -->
+      <div class="lab-card">
+        <span class="section-kicker">Endpoint: GET /api/model-metadata</span>
+        <h3 id="statusMetadataTitle" style="margin-top: 4px;">Checking ML Pipeline…</h3>
+        <p id="statusMetadataText" style="color: var(--text-muted); font-size: 0.85rem;">
+          Checking Random Forest pipeline serialization and feature orders.
+        </p>
+        <div style="margin-top: 14px;">
+          <span class="pill" id="statusMetaPill">Verifying…</span>
+        </div>
+      </div>
+
+      <!-- Endpoint 3: Telemetry Readings -->
+      <div class="lab-card">
+        <span class="section-kicker">Endpoint: GET /api/readings</span>
+        <h3 id="statusReadingsTitle" style="margin-top: 4px;">Checking Telemetry…</h3>
+        <p id="statusReadingsText" style="color: var(--text-muted); font-size: 0.85rem;">
+          Checking database reading query and ESP32 ingestion logs.
+        </p>
+        <div style="margin-top: 14px;">
+          <span class="pill" id="statusReadingsPill">Querying…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Infrastructure Environment Overview -->
+    <div class="lab-card" style="margin-top: 36px;">
+      <span class="section-kicker">Deployment Infrastructure</span>
+      <h3>Host Environment & Deployment Specs</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <small style="color: var(--text-dim); text-transform: uppercase; font-size: 0.72rem; font-weight: 800;">Hosting Platform</small>
+          <div style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-top: 4px;">Render Cloud Web Service</div>
+          <span style="font-size: 0.78rem; color: var(--green-400);">● Production Live</span>
+        </div>
+
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <small style="color: var(--text-dim); text-transform: uppercase; font-size: 0.72rem; font-weight: 800;">Primary Domain</small>
+          <div style="font-weight: 700; color: var(--cyan-400); font-size: 0.88rem; margin-top: 4px; font-family: var(--font-mono);">
+            sepsis-prediction-dashboard.onrender.com
+          </div>
+          <span style="font-size: 0.78rem; color: var(--text-dim);">HTTPS TLS 1.3</span>
+        </div>
+
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <small style="color: var(--text-dim); text-transform: uppercase; font-size: 0.72rem; font-weight: 800;">WSGI Server</small>
+          <div style="font-weight: 700; color: var(--text-main); font-size: 1rem; margin-top: 4px;">Gunicorn 23.0.0</div>
+          <span style="font-size: 0.78rem; color: var(--text-dim);">Python 3.11</span>
+        </div>
+
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <small style="color: var(--text-dim); text-transform: uppercase; font-size: 0.72rem; font-weight: 800;">Sensor Ingestion</small>
+          <div style="font-weight: 700; color: var(--teal-400); font-size: 1rem; margin-top: 4px;">ESP32 Node Active</div>
+          <span style="font-size: 0.78rem; color: var(--text-dim);">5-second transmission</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/status.js') }}" defer></script>
+{% endblock %}

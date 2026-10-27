@@ -1,30 +1,37 @@
 """
 SepsisSense Notification Service
-Handles email notifications (via Gmail API / SMTP) and WhatsApp notifications (via Twilio).
-Server-side credentials only. Fails gracefully with explicit status when unconfigured.
+Handles email notifications (via Gmail API / SMTP) and WhatsApp alerts (via Twilio).
+Server-side credentials only. Sanitizes environment variables and logs outcomes.
 """
 
+import base64
+import json
+import logging
 import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-import base64
-import json
 
 from database import log_notification_event
 
+logger = logging.getLogger(__name__)
+
+
+def _clean_env(name):
+    val = os.getenv(name)
+    return val.strip().strip("'\"") if val else ""
+
 
 def get_email_status():
-    """Returns whether email delivery is configured and provider details."""
-    gmail_token = os.getenv("GMAIL_REFRESH_TOKEN") or os.getenv("GMAIL_API_KEY")
-    smtp_host = os.getenv("SMTP_HOST")
-    smtp_user = os.getenv("SMTP_USER")
+    gmail_token = _clean_env("GMAIL_REFRESH_TOKEN") or _clean_env("GMAIL_API_KEY")
+    smtp_host = _clean_env("SMTP_HOST")
+    smtp_user = _clean_env("SMTP_USER")
 
     if gmail_token:
-        return {"configured": True, "provider": "Gmail API", "sender": os.getenv("GMAIL_SENDER", "notifications@sepsissense.org")}
+        return {"configured": True, "provider": "Gmail API", "sender": _clean_env("GMAIL_SENDER") or "notifications@sepsissense.org"}
     if smtp_host and smtp_user:
         return {"configured": True, "provider": f"SMTP ({smtp_host})", "sender": smtp_user}
     return {
@@ -35,10 +42,9 @@ def get_email_status():
 
 
 def get_whatsapp_status():
-    """Returns whether Twilio WhatsApp delivery is configured."""
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_number = os.getenv("TWILIO_WHATSAPP_NUMBER")
+    account_sid = _clean_env("TWILIO_ACCOUNT_SID")
+    auth_token = _clean_env("TWILIO_AUTH_TOKEN")
+    from_number = _clean_env("TWILIO_WHATSAPP_NUMBER")
 
     if account_sid and auth_token and from_number:
         return {
@@ -54,10 +60,6 @@ def get_whatsapp_status():
 
 
 def send_email_notification(to_email, subject, body_html, body_text="", user_id=None):
-    """
-    Sends an email notification if configured, logging the result.
-    Does not crash if provider credentials are absent.
-    """
     if not to_email:
         return {"success": False, "error": "Recipient email address is required."}
 
@@ -73,15 +75,14 @@ def send_email_notification(to_email, subject, body_html, body_text="", user_id=
         )
         return {
             "success": False,
-            "error": "Email provider is not configured. Set GMAIL or SMTP variables.",
+            "error": "Email provider is not configured. Set GMAIL or SMTP variables in Render.",
             "unconfigured": True,
         }
 
-    # Attempt SMTP send if SMTP is set
-    smtp_host = os.getenv("SMTP_HOST")
-    smtp_port = int(os.getenv("SMTP_PORT", "587"))
-    smtp_user = os.getenv("SMTP_USER")
-    smtp_pass = os.getenv("SMTP_PASS")
+    smtp_host = _clean_env("SMTP_HOST")
+    smtp_port = int(_clean_env("SMTP_PORT") or "587")
+    smtp_user = _clean_env("SMTP_USER")
+    smtp_pass = _clean_env("SMTP_PASS")
 
     if smtp_host and smtp_user and smtp_pass:
         try:
@@ -106,15 +107,11 @@ def send_email_notification(to_email, subject, body_html, body_text="", user_id=
             log_notification_event(user_id, "email", subject[:50], to_email, "failed", str(exc))
             return {"success": False, "error": f"SMTP delivery failed: {exc}"}
 
-    # Gmail API placeholder (requires OAuth token)
     log_notification_event(user_id, "email", subject[:50], to_email, "unconfigured", "Gmail API credentials pending token exchange.")
     return {"success": False, "error": "Gmail API requires refresh token exchange."}
 
 
 def send_whatsapp_notification(to_number, message_text, user_id=None):
-    """
-    Sends a WhatsApp message via Twilio REST API if configured, logging the result.
-    """
     if not to_number:
         return {"success": False, "error": "Recipient phone number is required."}
 
@@ -134,13 +131,15 @@ def send_whatsapp_notification(to_number, message_text, user_id=None):
             "unconfigured": True,
         }
 
-    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-    from_number = os.getenv("TWILIO_WHATSAPP_NUMBER")
+    account_sid = _clean_env("TWILIO_ACCOUNT_SID")
+    auth_token = _clean_env("TWILIO_AUTH_TOKEN")
+    from_number = _clean_env("TWILIO_WHATSAPP_NUMBER")
     if not from_number.startswith("whatsapp:"):
         from_number = f"whatsapp:{from_number}"
 
-    target_number = to_number if to_number.startswith("whatsapp:") else f"whatsapp:{to_number}"
+    target_number = to_number.strip()
+    if not target_number.startswith("whatsapp:"):
+        target_number = f"whatsapp:{target_number}"
 
     url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
     auth_header = "Basic " + base64.b64encode(f"{account_sid}:{auth_token}".encode("utf-8")).decode("utf-8")
@@ -154,6 +153,7 @@ def send_whatsapp_notification(to_number, message_text, user_id=None):
     req = Request(url, data=payload, headers={
         "Authorization": auth_header,
         "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "SepsisSense-Twilio/2.0",
     }, method="POST")
 
     try:
@@ -164,6 +164,12 @@ def send_whatsapp_notification(to_number, message_text, user_id=None):
             return {"success": True, "message": "WhatsApp alert delivered.", "sid": sid}
     except HTTPError as exc:
         err = f"Twilio HTTP {exc.code}"
+        try:
+            err_body = exc.read().decode("utf-8")
+            err_json = json.loads(err_body)
+            err = err_json.get("message", err)
+        except Exception:
+            pass
         log_notification_event(user_id, "whatsapp", "alert", to_number, "failed", err)
         return {"success": False, "error": err}
     except Exception as exc:
@@ -172,17 +178,12 @@ def send_whatsapp_notification(to_number, message_text, user_id=None):
 
 
 def dispatch_risk_alert_if_needed(reading):
-    """
-    If reading triggered SEPSIS_RISK_FLAG, logs the system event.
-    Note: Does not spam notifications or claim clinical certainty.
-    """
     if reading.get("prediction") == "SEPSIS_RISK_FLAG":
         bpm = reading.get("bpm")
         temp = reading.get("temperature")
         spo2 = reading.get("spo2")
         prob = reading.get("sepsis_probability", 0)
 
-        # Log an internal event for dashboard review
         log_notification_event(
             user_id=None,
             channel="system",

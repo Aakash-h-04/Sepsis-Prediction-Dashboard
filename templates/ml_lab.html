@@ -31,6 +31,11 @@
           Inputs are sent to <code>POST /api/predict</code>. Test runs are strictly for demonstration and are not stored in the database.
         </p>
 
+        <!-- Animated EKG Waveform -->
+        <div class="ekg-canvas-container" style="margin-bottom: 18px;">
+          <canvas id="mlEkgCanvas" class="ekg-canvas"></canvas>
+        </div>
+
         <!-- Presets -->
         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
           <button type="button" class="btn btn-ghost btn-small preset-btn" data-bpm="80" data-temp="36.8" data-spo2="98">
