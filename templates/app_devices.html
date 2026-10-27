@@ -1,0 +1,70 @@
+{% extends "site_base.html" %}
+{% block title %}IoT Device Registry · SepsisSense Telemetry{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">IOT EDGE INFRASTRUCTURE</span>
+    <h1>Connected Sensor Nodes</h1>
+    <p>Manage registered ESP32 edge microcontrollers, review telemetry heartbeat timestamps, and generate ingestion keys.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="lab-layout">
+      <!-- Device List -->
+      <div class="lab-card">
+        <h3>Active Edge Devices</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
+          Devices authenticated to stream telemetry to <code>POST /api/readings</code>.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          {% for dev in devices %}
+            <div style="padding: 16px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong style="color: var(--text-main); font-size: 1rem;">{{ dev.device_name }}</strong>
+                <div style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-dim); margin-top: 4px;">
+                  Key: <code>{{ dev.device_key }}</code> · Type: {{ dev.device_type }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
+                  Last seen: {{ dev.last_seen or 'Just now' }}
+                </div>
+              </div>
+              <span class="badge-normal">ONLINE</span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Register New Device & ESP32 Code Snippet -->
+      <div class="lab-card">
+        <h3>Register New Edge Node</h3>
+        <form method="POST" action="{{ url_for('app_devices') }}" style="margin-bottom: 24px;">
+          <div class="form-group">
+            <label for="devName">Device Name / Location</label>
+            <input type="text" id="devName" name="device_name" class="form-control" placeholder="e.g. ICU Bed 4 Monitor" required>
+          </div>
+          <div class="form-group">
+            <label for="devKey">Device ID / Key</label>
+            <input type="text" id="devKey" name="device_key" class="form-control" placeholder="e.g. ESP32-Ward-02" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-small">Register Device</button>
+        </form>
+
+        <h4 style="margin: 20px 0 10px; font-size: 0.95rem; color: var(--text-main);">ESP32 Arduino Firmware Contract</h4>
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 0.8rem; color: var(--teal-400); overflow-x: auto;">
+// Sample ESP32 JSON payload sent every 5 seconds:<br>
+{<br>
+&nbsp;&nbsp;"bpm": 82.0,<br>
+&nbsp;&nbsp;"temperature": 36.7,<br>
+&nbsp;&nbsp;"spo2": 98.0<br>
+}<br>
+// Target URL: POST https://sepsis-prediction-dashboard.onrender.com/api/readings
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

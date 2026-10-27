@@ -1,0 +1,185 @@
+{% extends "site_base.html" %}
+{% block title %}Machine Learning Laboratory · Model Architecture & Live Inference{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">MACHINE LEARNING LABORATORY</span>
+    <h1>Explore the model that actually runs.</h1>
+    <p>
+      Inspect the real Scikit-learn Random Forest pipeline, understand feature mapping from <code>[bpm, temp, spo2]</code> 
+      to <code>[HR, O2Sat, Temp]</code>, and test predictions using the deployed backend.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Medical Warning Callout -->
+    <div class="hero-note" style="margin-bottom: 30px;">
+      <span aria-hidden="true">⚠️</span>
+      <div>
+        <strong>Critical Clinical Disclaimer:</strong> Predictions generated in this laboratory are raw mathematical inferences from an experimental research pipeline. A low score or <code>NO_RISK_FLAG</code> does NOT establish medical safety or rule out sepsis.
+      </div>
+    </div>
+
+    <div class="lab-layout">
+      <!-- Interactive Inference Form -->
+      <div class="lab-card">
+        <h3>Live Inference Playground</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+          Inputs are sent to <code>POST /api/predict</code>. Test runs are strictly for demonstration and are not stored in the database.
+        </p>
+
+        <!-- Presets -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+          <button type="button" class="btn btn-ghost btn-small preset-btn" data-bpm="80" data-temp="36.8" data-spo2="98">
+            Normal Resting
+          </button>
+          <button type="button" class="btn btn-ghost btn-small preset-btn" data-bpm="135" data-temp="39.2" data-spo2="93">
+            Tachycardia + Fever
+          </button>
+          <button type="button" class="btn btn-ghost btn-small preset-btn" data-bpm="115" data-temp="35.2" data-spo2="89">
+            Hypothermia + Hypoxia
+          </button>
+        </div>
+
+        <form id="predictionForm">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px;">
+            <div class="form-group">
+              <label for="bpmInput">Heart Rate (BPM)</label>
+              <input id="bpmInput" type="number" class="form-control" min="1" max="300" step="any" value="82" required>
+            </div>
+            <div class="form-group">
+              <label for="temperatureInput">Temperature (°C)</label>
+              <input id="temperatureInput" type="number" class="form-control" min="20" max="45" step="any" value="36.7" required>
+            </div>
+            <div class="form-group">
+              <label for="spo2Input">SpO₂ (%)</label>
+              <input id="spo2Input" type="number" class="form-control" min="0" max="100" step="any" value="98" required>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="predictButton" type="submit" style="width: 100%;">
+            Run Model Inference →
+          </button>
+        </form>
+
+        <div id="predictionResult" style="display: none; margin-top: 24px; padding: 20px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <span style="font-size: 0.8rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase;">Inference Result</span>
+            <span id="predictionBadge" class="badge-normal">NO_RISK_FLAG</span>
+          </div>
+
+          <div class="cm-metrics-grid">
+            <div class="cm-metric-badge">
+              <small>Sepsis Probability</small>
+              <strong id="predictionScore" style="color: var(--teal-400);">0.00%</strong>
+            </div>
+            <div class="cm-metric-badge">
+              <small>Decision Threshold</small>
+              <strong id="predictionThreshold">0.010</strong>
+            </div>
+          </div>
+
+          <!-- Probability vs Threshold Bar -->
+          <div style="margin-top: 18px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 4px;">
+              <span>Score vs Threshold (0.01)</span>
+              <span id="probBarLabel">0.00%</span>
+            </div>
+            <div style="position: relative; height: 10px; background: var(--bg-input); border-radius: var(--radius-full); overflow: hidden;">
+              <div id="probBarFill" style="height: 100%; width: 0%; background: var(--teal-500); transition: width 0.4s ease;"></div>
+            </div>
+          </div>
+
+          <p id="predictionWarning" style="margin: 14px 0 0; font-size: 0.8rem; color: var(--text-dim);"></p>
+        </div>
+      </div>
+
+      <!-- Real Model Metadata Panel -->
+      <div class="lab-card">
+        <h3>Saved Model Pipeline Architecture</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+          Live metadata loaded directly from <code>model/sensor_model_metadata.json</code>:
+        </p>
+
+        <div class="cm-metrics-grid">
+          <div class="cm-metric-badge">
+            <small>Classifier</small>
+            <strong style="font-size: 1.1rem;">Random Forest</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">200 Estimators · Balanced</span>
+          </div>
+          <div class="cm-metric-badge">
+            <small>Selected Threshold</small>
+            <strong id="metaThreshold">0.01</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Tuned on validation F1</span>
+          </div>
+          <div class="cm-metric-badge">
+            <small>Test Accuracy</small>
+            <strong id="testAccuracy">59.61%</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Holdout evaluation</span>
+          </div>
+          <div class="cm-metric-badge">
+            <small>Test Precision</small>
+            <strong id="testPrecision" style="color: var(--coral-400);">3.70%</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Class imbalance impact</span>
+          </div>
+          <div class="cm-metric-badge">
+            <small>Test Recall (Sensitivity)</small>
+            <strong id="testRecall">55.32%</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">26/47 positive cases</span>
+          </div>
+          <div class="cm-metric-badge">
+            <small>Test ROC-AUC</small>
+            <strong id="testAuc">0.5854</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Ranking discrimination</span>
+          </div>
+        </div>
+
+        <h4 style="margin: 22px 0 10px; font-size: 0.95rem; color: var(--text-main);">Feature Order Mapping</h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); font-size: 0.85rem;">
+            <span>1. <code>HR</code> (Heart Rate, BPM)</span>
+            <span style="color: var(--text-dim);">API: <code>bpm</code></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); font-size: 0.85rem;">
+            <span>2. <code>O2Sat</code> (Oxygen Saturation, %)</span>
+            <span style="color: var(--text-dim);">API: <code>spo2</code></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); font-size: 0.85rem;">
+            <span>3. <code>Temp</code> (Temperature, °C)</span>
+            <span style="color: var(--text-dim);">API: <code>temperature</code></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Deep Dive & Interview Questions -->
+    <div class="lab-card" style="margin-top: 36px;">
+      <span class="eyebrow">ENGINEERING & INTERVIEW PREPARATION</span>
+      <h3>Technical Deep Dive: Design Decisions & Trade-Offs</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px;">
+        <div style="padding: 18px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+          <strong style="color: var(--teal-400);">Q1: Why did you choose a decision threshold of 0.01 instead of 0.50?</strong>
+          <p style="margin: 8px 0 0; font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            In clinical triage, false negatives are catastrophic (missing an impending septic shock event), whereas false positives trigger clinical review. Under extreme class imbalance (~2% positive rate), standard 0.50 thresholds produce near-zero sensitivity. Threshold 0.01 was empirically selected on the validation set to achieve ~55% recall.
+          </p>
+        </div>
+
+        <div style="padding: 18px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+          <strong style="color: var(--teal-400);">Q2: How do you prevent patient-level data leakage during training?</strong>
+          <p style="margin: 8px 0 0; font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            Splitting hourly ICU rows randomly causes severe data leakage because consecutive hours from the same patient share identical physiological baselines. We enforced group-based splitting on <code>PatientID</code> so no patient's data ever spans across train, validation, and test partitions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/ml_lab.js') }}" defer></script>
+{% endblock %}

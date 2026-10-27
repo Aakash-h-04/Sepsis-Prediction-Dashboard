@@ -1,0 +1,121 @@
+{% extends "site_base.html" %}
+{% block title %}Application Portal · SepsisSense Telemetry & Health Intelligence{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <span class="eyebrow">APPLICATION PORTAL</span>
+        <h1>Telemetry & Clinical Observability</h1>
+        <p>Central hub for active IoT sensor nodes, experimental risk classifications, and quick laboratory access.</p>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <a href="{{ url_for('home') }}" class="btn btn-primary btn-small">Open Live Sensor Dashboard ↗</a>
+        <a href="{{ url_for('app_history') }}" class="btn btn-ghost btn-small">View Reading History</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Live Vitals Snapshot from Latest Reading -->
+    <div class="lab-card" style="margin-bottom: 30px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase;">Latest Telemetry Ingestion</span>
+          <h3 style="margin: 4px 0 0;">Edge Sensor Node (ESP32)</h3>
+        </div>
+        <div>
+          {% if latest_reading %}
+            {% if latest_reading.get('prediction') == 'SEPSIS_RISK_FLAG' %}
+              <span class="badge-risk">SEPSIS_RISK_FLAG</span>
+            {% else %}
+              <span class="badge-normal">NO_RISK_FLAG</span>
+            {% endif %}
+          {% else %}
+            <span class="pill">Awaiting sensor data</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card-grid-4">
+        <div class="cm-metric-badge">
+          <small>Heart Rate</small>
+          <strong>{{ latest_reading.bpm|round(1) if latest_reading else '82.0' }} <span style="font-size: 0.9rem; font-weight: 600;">BPM</span></strong>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">ESP32 Pulse Sensor</span>
+        </div>
+
+        <div class="cm-metric-badge">
+          <small>Temperature</small>
+          <strong>{{ latest_reading.temperature|round(1) if latest_reading else '36.7' }} <span style="font-size: 0.9rem; font-weight: 600;">°C</span></strong>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">Skin / ambient probe</span>
+        </div>
+
+        <div class="cm-metric-badge">
+          <small>Oxygen Saturation</small>
+          <strong>{{ latest_reading.spo2|round(1) if latest_reading else '98.0' }} <span style="font-size: 0.9rem; font-weight: 600;">%</span></strong>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">Photoplethysmography</span>
+        </div>
+
+        <div class="cm-metric-badge">
+          <small>Model Risk Score</small>
+          <strong style="color: var(--teal-400);">{{ (latest_reading.sepsis_probability * 100)|round(2) if latest_reading and latest_reading.sepsis_probability else '0.00' }}%</strong>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">Threshold: 0.010 (1.0%)</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-dim);">
+        <span>Timestamp: <strong>{{ latest_reading.timestamp if latest_reading else 'Simulated baseline' }}</strong></span>
+        <span>Device ID: <code>{{ latest_reading.device_id if latest_reading and latest_reading.device_id else 'ESP32-Sepsis-01' }}</code></span>
+      </div>
+    </div>
+
+    <!-- Quick Navigation Grid -->
+    <div class="card-grid-3">
+      <div class="feature-card">
+        <div class="feature-icon-box">📊</div>
+        <h3>Live Monitoring Dashboard</h3>
+        <p>Interactive Chart.js real-time graphing of incoming pulse, temperature, and SpO2 vital signs with automatic 5-second polling.</p>
+        <a href="{{ url_for('home') }}" class="btn btn-primary btn-small">Open Dashboard →</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">📜</div>
+        <h3>Reading History & Audit</h3>
+        <p>Search, filter, paginate, and download complete historical sensor streams as CSV files for analytical review.</p>
+        <a href="{{ url_for('app_history') }}" class="btn btn-ghost btn-small">Browse History →</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">📡</div>
+        <h3>IoT Device Registry</h3>
+        <p>Manage authenticated ESP32 nodes, monitor last-seen heartbeats, generate API keys, and download firmware sample sketches.</p>
+        <a href="{{ url_for('app_devices') }}" class="btn btn-ghost btn-small">Device Registry →</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">🤖</div>
+        <h3>Interactive ML Lab</h3>
+        <p>Test hypothetical clinical observations against the active Random Forest classifier without storing readings.</p>
+        <a href="{{ url_for('ml_lab') }}" class="btn btn-ghost btn-small">Open ML Lab →</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">🎙️</div>
+        <h3>Multilingual AI Assistant</h3>
+        <p>Ask sepsis education and codebase architecture questions in English, Hindi, Tamil, or Kannada with voice synthesis.</p>
+        <a href="{{ url_for('assistant_page') }}" class="btn btn-ghost btn-small">Open AI Guide →</a>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon-box">⚙️</div>
+        <h3>Alerts & Preferences</h3>
+        <p>Configure automated email (Gmail API) and WhatsApp (Twilio) notifications for experimental risk alerts.</p>
+        <a href="{{ url_for('app_settings') }}" class="btn btn-ghost btn-small">Notification Settings →</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

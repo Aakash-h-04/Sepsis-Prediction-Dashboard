@@ -1,0 +1,34 @@
+{% extends "site_base.html" %}
+{% block title %}Reset Password · SepsisSense{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h2>Password Recovery</h2>
+      <p>Enter your registered email address to receive recovery instructions.</p>
+    </div>
+
+    {% if message %}
+      <div class="hero-note" style="margin-top: 0; margin-bottom: 20px; background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: var(--green-400);">
+        <span>✓</span> <div>{{ message }}</div>
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('auth_forgot_password') }}">
+      <div class="form-group">
+        <label for="resetEmail">Email Address</label>
+        <input type="email" id="resetEmail" name="email" class="form-control" placeholder="researcher@example.com" required autofocus>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+        Send Recovery Link
+      </button>
+
+      <div style="margin-top: 20px; text-align: center; font-size: 0.85rem; color: var(--text-dim);">
+        Remembered your password? <a href="{{ url_for('auth_login') }}" style="color: var(--teal-400); font-weight: 700;">Sign in</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

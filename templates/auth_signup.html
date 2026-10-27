@@ -1,0 +1,55 @@
+{% extends "site_base.html" %}
+{% block title %}Create Account · SepsisSense{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span class="brand-mark" style="margin: 0 auto 12px;">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M16 4v24M4 16h24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="16" cy="16" r="11.5" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+      </span>
+      <h2>Create Your Account</h2>
+      <p>Join the SepsisSense learning and clinical engineering platform.</p>
+    </div>
+
+    {% if error %}
+      <div class="hero-note" style="margin-top: 0; margin-bottom: 20px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--coral-400);">
+        <span>⚠️</span> <div>{{ error }}</div>
+      </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('auth_signup') }}">
+      <div class="form-group">
+        <label for="regName">Full Name</label>
+        <input type="text" id="regName" name="name" class="form-control" placeholder="Dr. Jane Smith" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label for="regEmail">Email Address</label>
+        <input type="email" id="regEmail" name="email" class="form-control" placeholder="researcher@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="regPassword">Password</label>
+        <input type="password" id="regPassword" name="password" class="form-control" placeholder="At least 8 characters" minlength="8" required>
+      </div>
+
+      <div class="form-group">
+        <label for="regConfirm">Confirm Password</label>
+        <input type="password" id="regConfirm" name="confirm_password" class="form-control" placeholder="Re-enter password" minlength="8" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+        Create Account →
+      </button>
+
+      <div style="margin-top: 20px; text-align: center; font-size: 0.85rem; color: var(--text-dim);">
+        Already have an account? <a href="{{ url_for('auth_login') }}" style="color: var(--teal-400); font-weight: 700;">Sign in</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

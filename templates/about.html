@@ -1,0 +1,79 @@
+{% extends "site_base.html" %}
+{% block title %}About SepsisSense · Project Architecture & Methodology{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">PROJECT ARCHITECTURE & MISSION</span>
+    <h1>Building healthcare technology with complete transparency.</h1>
+    <p>
+      SepsisSense unites public health awareness, interactive biomedical education, and an end-to-end IoT-to-cloud 
+      machine-learning architecture into a cohesive, production-grade web platform.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container content-layout">
+    <article class="prose">
+      <h2>Project Motivation & Problem Statement</h2>
+      <p>
+        Sepsis affects nearly 49 million individuals annually, resulting in roughly 11 million global deaths (~20% of all global mortality). 
+        Despite its prevalence, public awareness of sepsis warning signs remains dangerously low. 
+        Simultaneously, while AI and IoT monitoring hold immense potential for early physiological alerting, 
+        experimental healthcare models are frequently obfuscated behind exaggerated marketing or opaque black-box interfaces.
+      </p>
+      <p>
+        <strong>SepsisSense was engineered to solve both challenges:</strong> provide accessible, scientifically rigorous public education 
+        while demonstrating full engineering transparency for an experimental vital-sign machine-learning pipeline.
+      </p>
+
+      <h2>System Architecture & Component Flow</h2>
+      <ol>
+        <li>
+          <strong>Edge Telemetry (ESP32):</strong> An edge microcontroller captures vital signs (Heart Rate, Temperature, SpO2) and dispatches TLS-encrypted JSON payloads every 5 seconds to <code>POST /api/readings</code>.
+        </li>
+        <li>
+          <strong>Backend Web Server (Python Flask & Gunicorn on Render):</strong> Validates numerical ranges and finite bounds, safeguards API compatibility, and coordinates storage and inference.
+        </li>
+        <li>
+          <strong>Machine Learning Pipeline (Scikit-learn Random Forest):</strong> Re-maps incoming keys into feature order <code>[HR, O2Sat, Temp]</code>, passes inputs through median imputation and 200 decision trees, and evaluates class probability against a tuned 0.01 threshold.
+        </li>
+        <li>
+          <strong>Database & Session Persistence (SQLite & PostgreSQL Compatible):</strong> Stores sensor readings, registered edge devices, user credentials with secure hashing, notification preferences, chat logs, and administrative audit trails.
+        </li>
+        <li>
+          <strong>Multilingual AI Assistant & Speech Avatar:</strong> Dynamic dual-mode assistant supporting English, Hindi, Tamil, and Kannada with Web Speech API voice input and SpeechSynthesis vocalization.
+        </li>
+        <li>
+          <strong>Automated Alert Integrations:</strong> Server-side notification services supporting Gmail API / SMTP and Twilio WhatsApp delivery.
+        </li>
+      </ol>
+
+      <h2>Scientific & Clinical Limitations</h2>
+      <p>
+        SepsisSense strictly upholds medical safety. The deployed Random Forest model was trained on exploratory row-level PhysioNet Challenge data. 
+        Because sepsis is relatively rare in hospital stays, the holdout test set demonstrates a precision of 3.70% and a ROC-AUC of 0.5854. 
+        These metrics highlight that <strong>sensor vitals alone cannot diagnose sepsis</strong>; clinical diagnosis requires laboratory cultures, organ failure biomarkers (lactate, creatinine, platelets), and licensed medical evaluation.
+      </p>
+
+      <h2>Future Work</h2>
+      <p>
+        Future iterations aim to incorporate multimodal continuous time-series modeling (e.g. LSTM / Transformer architectures), 
+        wearable Bluetooth Low Energy (BLE) peripheral pairings, and automated laboratory EHR integrations under HIPAA/FHIR compliance standards.
+      </p>
+    </article>
+
+    <aside class="sidebar-card">
+      <h3>Quick Links</h3>
+      <a href="{{ url_for('home') }}">Monitoring Dashboard ↗</a>
+      <a href="{{ url_for('biology_lab') }}">Biology Laboratory</a>
+      <a href="{{ url_for('mathematics_lab') }}">Mathematics Lab</a>
+      <a href="{{ url_for('ml_lab') }}">Machine Learning Lab</a>
+      <a href="{{ url_for('assistant_page') }}">Multilingual AI Guide</a>
+      <a href="{{ url_for('research') }}">Research Methodology</a>
+      <a href="https://github.com/Aakash-h-04/Sepsis-Prediction-Dashboard" target="_blank" rel="noopener noreferrer">GitHub Repository ↗</a>
+    </aside>
+  </div>
+</section>
+{% endblock %}

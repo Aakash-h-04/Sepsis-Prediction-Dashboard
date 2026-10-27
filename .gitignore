@@ -9,6 +9,8 @@ env/
 *.db
 *.sqlite
 *.sqlite3
+*.pre-sepsissense*
+*.bak
 
 .vscode/combined_sepsis_data.csv
 combined_sepsis_data.csv

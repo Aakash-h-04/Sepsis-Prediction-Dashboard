@@ -1,0 +1,186 @@
+{% extends "site_base.html" %}
+{% block title %}Administrative Console · SepsisSense{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <span class="eyebrow" style="color: var(--coral-400);">PROTECTED CONSOLE</span>
+        <h1>System Administration & Governance</h1>
+        <p>Operational health metrics, telemetry audit trails, user role management, and notification provider statuses.</p>
+      </div>
+      <span class="badge-normal" style="font-size: 0.85rem; padding: 6px 14px;">
+        🛡️ Server-Enforced Role: Administrator
+      </span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Stat Counter Bar -->
+    <div class="card-grid-4" style="margin-bottom: 30px;">
+      <div class="cm-metric-badge">
+        <small>Total Sensor Readings</small>
+        <strong>{{ total_readings }}</strong>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">ESP32 historical stream</span>
+      </div>
+
+      <div class="cm-metric-badge">
+        <small>Registered Users</small>
+        <strong>{{ total_users }}</strong>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">Authenticated researchers</span>
+      </div>
+
+      <div class="cm-metric-badge">
+        <small>Connected Devices</small>
+        <strong>{{ devices|length }}</strong>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">IoT sensor nodes</span>
+      </div>
+
+      <div class="cm-metric-badge">
+        <small>Notification Events</small>
+        <strong>{{ notification_logs|length }}</strong>
+        <span style="font-size: 0.72rem; color: var(--text-dim);">Delivery audit logs</span>
+      </div>
+    </div>
+
+    <!-- Provider Health & Integration Audit -->
+    <div class="lab-card" style="margin-bottom: 30px;">
+      <h3>Third-Party Provider Status Audit</h3>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px;">
+        All API secrets and credentials remain strictly server-side. Redacted diagnostic checks:
+      </p>
+
+      <div class="card-grid-3">
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong>Email (Gmail / SMTP)</strong>
+            <span class="pill {{ 'pill-live' if email_status.configured else 'pill-warning' }}">
+              {{ 'CONFIGURED' if email_status.configured else 'UNCONFIGURED' }}
+            </span>
+          </div>
+          <small style="color: var(--text-dim);">Provider: {{ email_status.provider }}</small>
+        </div>
+
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong>Twilio WhatsApp</strong>
+            <span class="pill {{ 'pill-live' if whatsapp_status.configured else 'pill-warning' }}">
+              {{ 'CONFIGURED' if whatsapp_status.configured else 'UNCONFIGURED' }}
+            </span>
+          </div>
+          <small style="color: var(--text-dim);">Provider: {{ whatsapp_status.provider }}</small>
+        </div>
+
+        <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong>Conversational LLM</strong>
+            <span class="pill {{ 'pill-live' if llm_status.configured else 'pill-warning' }}">
+              {{ 'CONFIGURED' if llm_status.configured else 'CURATED_FALLBACK' }}
+            </span>
+          </div>
+          <small style="color: var(--text-dim);">Model: {{ llm_status.model }}</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Management Table -->
+    <div class="lab-card" style="margin-bottom: 30px;">
+      <h3>User Management & Role Assignment</h3>
+      <div class="data-table-wrapper" style="margin-top: 16px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Admin Status</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td style="font-family: var(--font-mono);">#{{ u.id }}</td>
+                <td><strong>{{ u.name }}</strong></td>
+                <td>{{ u.email }}</td>
+                <td><span class="pill">{{ u.role }}</span></td>
+                <td>
+                  {% if u.is_admin %}
+                    <span class="badge-normal">Admin</span>
+                  {% else %}
+                    <span style="color: var(--text-dim); font-size: 0.8rem;">Standard User</span>
+                  {% endif %}
+                </td>
+                <td style="font-size: 0.8rem; color: var(--text-dim);">{{ u.created_at }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin_toggle_user') }}" style="margin: 0;">
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <input type="hidden" name="is_admin" value="{{ 0 if u.is_admin else 1 }}">
+                    <button type="submit" class="btn btn-ghost btn-small">
+                      {{ 'Revoke Admin' if u.is_admin else 'Make Admin' }}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Notification Delivery Logs -->
+    <div class="lab-card">
+      <h3>Notification Delivery Audit Log</h3>
+      <div class="data-table-wrapper" style="margin-top: 16px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Timestamp</th>
+              <th>Channel</th>
+              <th>Event</th>
+              <th>Recipient</th>
+              <th>Status</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if notification_logs %}
+              {% for log in notification_logs %}
+                <tr>
+                  <td style="font-family: var(--font-mono);">#{{ log.id }}</td>
+                  <td style="font-size: 0.8rem; color: var(--text-dim);">{{ log.created_at }}</td>
+                  <td><span class="pill">{{ log.channel }}</span></td>
+                  <td>{{ log.event_type }}</td>
+                  <td><code>{{ log.recipient }}</code></td>
+                  <td>
+                    {% if log.status == 'delivered' %}
+                      <span class="badge-normal">Delivered</span>
+                    {% elif log.status == 'unconfigured' %}
+                      <span class="pill pill-warning">Unconfigured</span>
+                    {% else %}
+                      <span class="badge-risk">{{ log.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size: 0.8rem; color: var(--text-dim);">{{ log.error_details or 'OK' }}</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-dim);">
+                  No notification events recorded yet.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

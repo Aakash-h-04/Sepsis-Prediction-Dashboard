@@ -1,0 +1,93 @@
+{% extends "site_base.html" %}
+{% block title %}Settings & Notification Preferences · SepsisSense{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">CONFIGURATION & ALERTS</span>
+    <h1>Settings & Alerts</h1>
+    <p>Configure automated email notifications (Gmail API), WhatsApp alerts (Twilio), and appearance options.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="lab-layout">
+      <!-- Notification Preferences -->
+      <div class="lab-card">
+        <h3>Telemetry Alert Channels</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
+          Choose how you receive alerts when an experimental <code>SEPSIS_RISK_FLAG</code> is logged.
+        </p>
+
+        <form method="POST" action="{{ url_for('app_settings') }}">
+          <div style="margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: 700; cursor: pointer;">
+              <input type="checkbox" name="email_enabled" value="1" {% if prefs and prefs.email_enabled %}checked{% endif %} style="accent-color: var(--teal-500); width: 18px; height: 18px;">
+              Enable Email Notifications (Gmail API / SMTP)
+            </label>
+            <div style="margin-left: 28px; margin-top: 8px;">
+              <input type="email" name="email_address" class="form-control" placeholder="alert-recipient@example.com" value="{{ prefs.email_address if prefs and prefs.email_address else '' }}">
+              <small style="color: var(--text-dim);">Provider: {{ email_provider_status.provider }} ({{ 'Configured' if email_provider_status.configured else 'Unconfigured' }})</small>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: 700; cursor: pointer;">
+              <input type="checkbox" name="whatsapp_enabled" value="1" {% if prefs and prefs.whatsapp_enabled %}checked{% endif %} style="accent-color: var(--teal-500); width: 18px; height: 18px;">
+              Enable WhatsApp Alerts (Twilio)
+            </label>
+            <div style="margin-left: 28px; margin-top: 8px;">
+              <input type="text" name="whatsapp_number" class="form-control" placeholder="+1234567890" value="{{ prefs.whatsapp_number if prefs and prefs.whatsapp_number else '' }}">
+              <small style="color: var(--text-dim);">Provider: {{ whatsapp_provider_status.provider }} ({{ 'Configured' if whatsapp_provider_status.configured else 'Unconfigured' }})</small>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 24px;">
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: 700; cursor: pointer;">
+              <input type="checkbox" name="alert_on_risk" value="1" {% if prefs and prefs.alert_on_risk %}checked{% endif %} style="accent-color: var(--teal-500); width: 18px; height: 18px;">
+              Alert only on SEPSIS_RISK_FLAG events
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save Preferences</button>
+        </form>
+      </div>
+
+      <!-- Test Notification & Provider Diagnostic -->
+      <div class="lab-card">
+        <h3>Provider Diagnostic & Test Send</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
+          Send a controlled test notification to verify delivery credentials.
+        </p>
+
+        <div style="margin-bottom: 24px; padding: 16px; background: var(--bg-surface-elevated); border-radius: var(--radius-md);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+            <span>Gmail / SMTP Integration:</span>
+            <strong style="color: {{ 'var(--green-400)' if email_provider_status.configured else 'var(--coral-400)' }};">
+              {{ 'CONFIGURED' if email_provider_status.configured else 'UNCONFIGURED' }}
+            </strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <span>Twilio WhatsApp Integration:</span>
+            <strong style="color: {{ 'var(--green-400)' if whatsapp_provider_status.configured else 'var(--coral-400)' }};">
+              {{ 'CONFIGURED' if whatsapp_provider_status.configured else 'UNCONFIGURED' }}
+            </strong>
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('api_test_notification') }}">
+          <div class="form-group">
+            <label for="testChannel">Test Channel</label>
+            <select name="channel" id="testChannel" class="form-control">
+              <option value="email">Email Notification</option>
+              <option value="whatsapp">WhatsApp Message</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-ghost btn-small">Send Test Ping</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

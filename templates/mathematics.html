@@ -1,0 +1,185 @@
+{% extends "site_base.html" %}
+{% block title %}Mathematics Laboratory · Metrics & Classification Theory{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">MATHEMATICAL FOUNDATIONS & METRICS</span>
+    <h1>Classification theory & decision trade-offs.</h1>
+    <p>
+      In clinical machine learning, no metric tells the whole story. Explore how true positives, false positives, 
+      class imbalance, and decision thresholds govern model performance.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="lab-layout">
+      <!-- Calculator Panel -->
+      <div class="lab-card">
+        <h3>Interactive Confusion Matrix</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+          Adjust the cells below. Values default to the actual recorded test results from <code>sensor_model_metadata.json</code>.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+          <div class="form-group">
+            <label for="tp">True Positives (TP)</label>
+            <input id="tp" type="number" class="form-control" min="0" step="1" value="26">
+          </div>
+          <div class="form-group">
+            <label for="fp">False Positives (FP)</label>
+            <input id="fp" type="number" class="form-control" min="0" step="1" value="677">
+          </div>
+          <div class="form-group">
+            <label for="fn">False Negatives (FN)</label>
+            <input id="fn" type="number" class="form-control" min="0" step="1" value="21">
+          </div>
+          <div class="form-group">
+            <label for="tn">True Negatives (TN)</label>
+            <input id="tn" type="number" class="form-control" min="0" step="1" value="1004">
+          </div>
+        </div>
+
+        <table class="cm-table">
+          <thead>
+            <tr>
+              <th style="background: transparent;"></th>
+              <th style="font-size: 0.75rem; color: var(--text-dim); text-align: center;">PREDICTED RISK</th>
+              <th style="font-size: 0.75rem; color: var(--text-dim); text-align: center;">PREDICTED NO RISK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th style="font-size: 0.75rem; color: var(--text-dim); text-align: right; padding-right: 12px;">ACTUAL SEPSIS</th>
+              <td class="cm-cell" style="border-left: 3px solid var(--teal-500);">
+                <label>TP (Hit)</label>
+                <span id="matrixTP" style="font-size: 1.25rem; font-weight: 800; color: var(--teal-400);">26</span>
+              </td>
+              <td class="cm-cell" style="border-left: 3px solid var(--coral-500);">
+                <label>FN (Miss)</label>
+                <span id="matrixFN" style="font-size: 1.25rem; font-weight: 800; color: var(--coral-400);">21</span>
+              </td>
+            </tr>
+            <tr>
+              <th style="font-size: 0.75rem; color: var(--text-dim); text-align: right; padding-right: 12px;">ACTUAL NON-SEPSIS</th>
+              <td class="cm-cell" style="border-left: 3px solid var(--coral-500);">
+                <label>FP (False Alarm)</label>
+                <span id="matrixFP" style="font-size: 1.25rem; font-weight: 800; color: var(--coral-400);">677</span>
+              </td>
+              <td class="cm-cell" style="border-left: 3px solid var(--teal-500);">
+                <label>TN (Correct Rejection)</label>
+                <span id="matrixTN" style="font-size: 1.25rem; font-weight: 800; color: var(--teal-400);">1004</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <button class="btn btn-ghost btn-small" id="useModelCounts" type="button">Reset to Model Test Set</button>
+          <button class="btn btn-ghost btn-small" id="setBalancedCounts" type="button">Load Balanced Example</button>
+        </div>
+      </div>
+
+      <!-- Real-Time Derived Metrics -->
+      <div class="lab-card">
+        <h3>Computed Classification Metrics</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+          Derived instantly from the confusion matrix counts. Zero denominators return <code>N/A</code>.
+        </p>
+
+        <div class="cm-metrics-grid">
+          <div class="cm-metric-badge">
+            <small>Recall / Sensitivity</small>
+            <strong id="metricRecall">—</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">TP / (TP + FN)</span>
+          </div>
+
+          <div class="cm-metric-badge">
+            <small>Precision (PPV)</small>
+            <strong id="metricPrecision" style="color: var(--coral-400);">—</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">TP / (TP + FP)</span>
+          </div>
+
+          <div class="cm-metric-badge">
+            <small>Specificity (TNR)</small>
+            <strong id="metricSpecificity">—</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">TN / (TN + FP)</span>
+          </div>
+
+          <div class="cm-metric-badge">
+            <small>Accuracy</small>
+            <strong id="metricAccuracy">—</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">(TP + TN) / Total</span>
+          </div>
+
+          <div class="cm-metric-badge">
+            <small>F1 Score</small>
+            <strong id="metricF1">—</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Harmonic mean of P & R</span>
+          </div>
+
+          <div class="cm-metric-badge">
+            <small>Total Observations</small>
+            <strong id="metricTotal">—</strong>
+            <span style="font-size: 0.72rem; color: var(--text-dim);">Sample size N</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding: 16px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <span style="font-size: 0.75rem; font-weight: 800; color: var(--cyan-400); text-transform: uppercase;">Mathematical Formulas</span>
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-main); margin-top: 8px;">
+            <div>Accuracy = (TP + TN) / (TP + TN + FP + FN)</div>
+            <div>Precision = TP / (TP + FP)</div>
+            <div>Recall = TP / (TP + FN)</div>
+            <div>F1 = 2 × (Precision × Recall) / (Precision + Recall)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Threshold Simulation -->
+    <div class="lab-card" style="margin-top: 30px;">
+      <span class="eyebrow">SYNTHETIC SIMULATOR</span>
+      <h3>Decision Threshold Sensitivity Simulator</h3>
+      <p style="color: var(--text-muted); max-width: 780px;">
+        The model outputs a continuous probability \(p \in [0, 1]\). If \(p \ge \text{threshold}\), it flags <code>SEPSIS_RISK_FLAG</code>. 
+        Standard ML defaults to 0.50, but because sepsis is rare, the project engineers selected <strong>0.01</strong>. Drag the slider to observe how threshold shifting transforms recall versus precision.
+      </p>
+
+      <div style="margin: 24px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <label for="thresholdSlider" style="font-weight: 700; font-size: 0.9rem;">
+            Classification Threshold: <span id="thresholdValue" style="color: var(--teal-400); font-family: var(--font-mono); font-size: 1.1rem;">0.01</span>
+          </label>
+          <span style="font-size: 0.8rem; color: var(--text-dim);">(Current project threshold = 0.01)</span>
+        </div>
+        <input type="range" id="thresholdSlider" min="0.005" max="0.50" step="0.005" value="0.01" style="width: 100%; accent-color: var(--teal-500);">
+      </div>
+
+      <div class="card-grid-3">
+        <div class="cm-metric-badge">
+          <small>Simulated Recall</small>
+          <strong id="simRecall">55.3%</strong>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">Percentage of actual sepsis detected</span>
+        </div>
+        <div class="cm-metric-badge">
+          <small>Simulated Precision</small>
+          <strong id="simPrecision" style="color: var(--coral-400);">3.7%</strong>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">Fraction of positive alerts that are true</span>
+        </div>
+        <div class="cm-metric-badge">
+          <small>Simulated False Alarms</small>
+          <strong id="simFP">677</strong>
+          <span style="font-size: 0.72rem; color: var(--text-dim);">Patients flagged without sepsis</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/mathematics.js') }}" defer></script>
+{% endblock %}

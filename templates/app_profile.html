@@ -1,0 +1,81 @@
+{% extends "site_base.html" %}
+{% block title %}User Profile · SepsisSense{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">ACCOUNT & IDENTITY</span>
+    <h1>User Profile</h1>
+    <p>Manage your account credentials, preferred interface language, and review learning achievements.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="lab-layout">
+      <!-- Profile Details Form -->
+      <div class="lab-card">
+        <h3>Personal Details</h3>
+        <form method="POST" action="{{ url_for('app_profile') }}">
+          <div class="form-group">
+            <label for="profName">Full Name</label>
+            <input type="text" id="profName" name="name" class="form-control" value="{{ user.name if user else 'Guest Researcher' }}" required>
+          </div>
+
+          <div class="form-group">
+            <label for="profEmail">Email Address</label>
+            <input type="email" id="profEmail" class="form-control" value="{{ user.email if user else 'guest@sepsissense.org' }}" disabled>
+            <small style="color: var(--text-dim);">Email address is associated with authentication.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="profLang">Default Assistant Language</label>
+            <select id="profLang" name="language" class="form-control">
+              <option value="en" {% if user and user.language == 'en' %}selected{% endif %}>English</option>
+              <option value="hi" {% if user and user.language == 'hi' %}selected{% endif %}>हिन्दी — Hindi</option>
+              <option value="ta" {% if user and user.language == 'ta' %}selected{% endif %}>தமிழ் — Tamil</option>
+              <option value="kn" {% if user and user.language == 'kn' %}selected{% endif %}>ಕನ್ನಡ — Kannada</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Save Changes</button>
+        </form>
+      </div>
+
+      <!-- Account Achievements & Learning Progress -->
+      <div class="lab-card">
+        <h3>Learning Lab Achievements</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">
+          Track your completed clinical learning modules:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>🧬 Biology Laboratory</strong>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Pathophysiology & Immunology</div>
+            </div>
+            <span class="badge-normal">COMPLETED</span>
+          </div>
+
+          <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>📐 Mathematics Laboratory</strong>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Confusion Matrix & Threshold Theory</div>
+            </div>
+            <span class="badge-normal">EXPLORED</span>
+          </div>
+
+          <div style="padding: 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong>🤖 ML Laboratory</strong>
+              <div style="font-size: 0.8rem; color: var(--text-dim);">Model Metrics & Feature Order</div>
+            </div>
+            <span class="badge-normal">VERIFIED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

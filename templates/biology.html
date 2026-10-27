@@ -1,0 +1,169 @@
+{% extends "site_base.html" %}
+{% block title %}Biology Laboratory · Sepsis Pathophysiology & Immunology{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">CELLULAR IMMUNOLOGY & PHYSIOLOGY</span>
+    <h1>From infection to a dysregulated host response.</h1>
+    <p>
+      Sepsis is not caused by the pathogen alone, but by the body's uncontrolled, life-threatening immunological reaction. 
+      Explore cellular pathways, vascular collapse, microcirculatory dysfunction, and why vital signs alone cannot confirm a diagnosis.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- 4-Stage Interactive Biological Progression -->
+    <div class="section-head" style="text-align: left; margin-bottom: 24px;">
+      <span class="section-kicker">Interactive Pathway</span>
+      <h2>The 4 Stages of Sepsis Pathophysiology</h2>
+      <p>Click on any stage to inspect the underlying cellular and vascular mechanisms.</p>
+    </div>
+
+    <div class="pipeline-flow" id="progressionFlow">
+      <div class="pipeline-node active" data-stage="1" style="cursor: pointer;">
+        <span class="node-step">STAGE 01</span>
+        <h4>Primary Infection</h4>
+        <p>Bacteria, viruses, or fungi enter the lungs, abdomen, urinary tract, or skin, releasing PAMPs.</p>
+      </div>
+
+      <div class="pipeline-node" data-stage="2" style="cursor: pointer;">
+        <span class="node-step">STAGE 02</span>
+        <h4>Host Hyper-Inflammation</h4>
+        <p>Macrophage activation triggers a pro-inflammatory storm (TNF-α, IL-1β, IL-6).</p>
+      </div>
+
+      <div class="pipeline-node" data-stage="3" style="cursor: pointer;">
+        <span class="node-step">STAGE 03</span>
+        <h4>Microvascular Breakdown</h4>
+        <p>Endothelial permeability increases; capillary leak leads to intravascular volume depletion.</p>
+      </div>
+
+      <div class="pipeline-node" data-stage="4" style="cursor: pointer;">
+        <span class="node-step">STAGE 04</span>
+        <h4>Multiorgan Dysfunction</h4>
+        <p>Cellular hypoxia, microthrombi, and mitochondrial exhaustion culminate in organ failure (MODS).</p>
+      </div>
+    </div>
+
+    <!-- Active Stage Detail Box -->
+    <div id="stageDetailCard" class="lab-card" style="margin-top: 24px; border-left: 4px solid var(--teal-500);">
+      <h3 id="stageTitle">Stage 1: Primary Infection & Pathogen Recognition</h3>
+      <p id="stageBody" style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7;">
+        The process begins when pathogens breach physical barriers. Common origins include pneumonia (lungs), intra-abdominal infections, urinary tract infections (UTIs), or catheter entry. Microbial components known as Pathogen-Associated Molecular Patterns (PAMPs) such as lipopolysaccharide (LPS) bind to Toll-like Receptors (TLRs) on resident immune cells, initiating the immune cascade.
+      </p>
+      <div id="stageClinicalVitals" style="margin-top: 14px; padding: 12px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); font-size: 0.88rem;">
+        <strong>Physiological Correlate:</strong> Normal to elevated resting heart rate, mild temperature fluctuation as the hypothalamus responds to pyrogens.
+      </div>
+    </div>
+
+    <!-- Deep Dive Lab & Clinical Glossary -->
+    <div class="lab-layout" style="margin-top: 40px;">
+      <!-- Concept Explorer -->
+      <div class="lab-card">
+        <h3>Cellular & Organ Concepts</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px;">
+          Select a biological system to inspect its role in sepsis pathogenesis:
+        </p>
+
+        <div class="form-group">
+          <label for="bioConceptSelect">Biological Domain</label>
+          <select id="bioConceptSelect" class="form-control">
+            <option value="innate">Innate vs. Adaptive Immune Dysregulation</option>
+            <option value="endothelial">Endothelial Barrier Breakdown & Capillary Leak</option>
+            <option value="coagulation">Coagulation Activation & Disseminated Intravascular Coagulation (DIC)</option>
+            <option value="mitochondrial">Mitochondrial Dysfunction & Cytopathic Hypoxia</option>
+            <option value="vitals">Why Sensor Vitals Alone Cannot Diagnose Sepsis</option>
+          </select>
+        </div>
+
+        <div id="bioConceptCard" style="padding: 18px; background: var(--bg-surface-elevated); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-top: 14px;">
+          <h4 id="bioConceptTitle" style="margin: 0 0 8px; color: var(--teal-400);">Innate vs. Adaptive Immune Dysregulation</h4>
+          <p id="bioConceptBody" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin: 0;">
+            Early sepsis is characterized by an excessive innate inflammatory burst (cytokines like TNF-alpha and IL-1). Simultaneously or shortly thereafter, extensive apoptosis of lymphocytes occurs, plunging the patient into profound compensatory anti-inflammatory and immunosuppressive paralysis (sepsis-induced immunoparalysis).
+          </p>
+        </div>
+      </div>
+
+      <!-- Clinical Glossary with Search -->
+      <div class="lab-card">
+        <h3>Clinical Terminology Glossary</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px;">
+          Search clinical terms used in ICU sepsis assessment:
+        </p>
+
+        <div class="form-group">
+          <input type="text" id="glossarySearch" class="form-control" placeholder="Search terms (e.g., SIRS, SOFA, DIC, Lactate)...">
+        </div>
+
+        <div id="glossaryList" style="display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto;">
+          <div class="glossary-item" data-term="sirs" style="padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--cyan-400);">
+            <strong style="font-size: 0.9rem; color: var(--text-main);">SIRS (Systemic Inflammatory Response Syndrome)</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-muted);">Clinical criteria including fever/hypothermia, tachycardia, tachypnea, and leukocytosis. Sensitive but non-specific.</p>
+          </div>
+          <div class="glossary-item" data-term="sofa qsofa" style="padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--teal-400);">
+            <strong style="font-size: 0.9rem; color: var(--text-main);">SOFA / qSOFA Score</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-muted);">Sequential Organ Failure Assessment. Measures organ deterioration across respiratory, cardiovascular, hepatic, coagulation, renal, and neurological systems.</p>
+          </div>
+          <div class="glossary-item" data-term="lactate hypoperfusion" style="padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--amber-400);">
+            <strong style="font-size: 0.9rem; color: var(--text-main);">Serum Lactate (&gt; 2 mmol/L)</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-muted);">Biomarker of anaerobic metabolism caused by microcirculatory hypoperfusion and cellular hypoxia.</p>
+          </div>
+          <div class="glossary-item" data-term="dic microthrombi" style="padding: 10px 14px; background: var(--bg-surface-elevated); border-radius: var(--radius-sm); border-left: 3px solid var(--coral-400);">
+            <strong style="font-size: 0.9rem; color: var(--text-main);">DIC (Disseminated Intravascular Coagulation)</strong>
+            <p style="margin: 4px 0 0; font-size: 0.82rem; color: var(--text-muted);">Pathological systemic activation of blood coagulation resulting in microthrombi that block capillary blood flow while consuming platelets.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Knowledge Check Quiz -->
+    <div class="lab-card" style="margin-top: 40px;">
+      <span class="eyebrow">EVALUATE YOUR UNDERSTANDING</span>
+      <h3>Biology Knowledge Check</h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">
+        Answer these 3 clinical biology questions to test your comprehension. Instant feedback provided.
+      </p>
+
+      <form id="bioQuizForm">
+        <div style="margin-bottom: 24px;">
+          <p style="font-weight: 700; color: var(--text-main); margin-bottom: 10px;">
+            1. Why can a patient with severe sepsis have normal or even low body temperature (hypothermia)?
+          </p>
+          <label style="display: block; margin-bottom: 8px; cursor: pointer; color: var(--text-muted);">
+            <input type="radio" name="q1" value="wrong1"> Sepsis only causes hypothermia in pediatric patients.
+          </label>
+          <label style="display: block; margin-bottom: 8px; cursor: pointer; color: var(--text-muted);">
+            <input type="radio" name="q1" value="correct"> Severe dysregulation can exhaust thermoregulatory centers, and hypothermia often indicates severe shock and poor prognosis.
+          </label>
+          <label style="display: block; margin-bottom: 8px; cursor: pointer; color: var(--text-muted);">
+            <input type="radio" name="q1" value="wrong2"> Hypothermia proves that the infection has been successfully cleared.
+          </label>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+          <p style="font-weight: 700; color: var(--text-main); margin-bottom: 10px;">
+            2. Can a 3-sensor IoT device (HR, SpO2, Temperature) conclusively diagnose sepsis?
+          </p>
+          <label style="display: block; margin-bottom: 8px; cursor: pointer; color: var(--text-muted);">
+            <input type="radio" name="q2" value="wrong1"> Yes, modern machine learning replaces all hospital laboratory tests.
+          </label>
+          <label style="display: block; margin-bottom: 8px; cursor: pointer; color: var(--text-muted);">
+            <input type="radio" name="q2" value="correct"> No. Sensor vitals provide physiological indicators, but clinical diagnosis requires comprehensive blood cultures, organ biomarkers (lactate, creatinine), and clinical examination.
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Check Quiz Answers</button>
+      </form>
+
+      <div id="quizFeedback" style="margin-top: 20px; display: none; padding: 16px; border-radius: var(--radius-md);"></div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/biology.js') }}" defer></script>
+{% endblock %}

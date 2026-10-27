@@ -1,0 +1,105 @@
+{% extends "site_base.html" %}
+{% block title %}Reading History & Export · SepsisSense Telemetry{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <span class="eyebrow">TELEMETRY AUDIT</span>
+        <h1>Sensor Reading History</h1>
+        <p>Complete historical logs of incoming vitals, classification outcomes, and timestamps from connected ESP32 devices.</p>
+      </div>
+      <div>
+        <a href="{{ url_for('export_readings_csv') }}" class="btn btn-primary btn-small">
+          📥 Download CSV Export
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Filter Bar -->
+    <div class="lab-card" style="padding: 18px 24px; margin-bottom: 24px;">
+      <form method="GET" action="{{ url_for('app_history') }}" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+        <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+          <label for="riskFilter">Filter by Risk Flag</label>
+          <select name="risk" id="riskFilter" class="form-control" onchange="this.form.submit()">
+            <option value="ALL" {% if risk_filter == 'ALL' or not risk_filter %}selected{% endif %}>All Readings</option>
+            <option value="SEPSIS_RISK_FLAG" {% if risk_filter == 'SEPSIS_RISK_FLAG' %}selected{% endif %}>Risk Flag Only</option>
+            <option value="NO_RISK_FLAG" {% if risk_filter == 'NO_RISK_FLAG' %}selected{% endif %}>No Risk Flag Only</option>
+          </select>
+        </div>
+
+        <div style="margin-left: auto; color: var(--text-dim); font-size: 0.85rem; align-self: center;">
+          Showing {{ readings|length }} of {{ total_count }} total recorded observations
+        </div>
+      </form>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Timestamp (UTC)</th>
+            <th>Device Node</th>
+            <th>BPM (HR)</th>
+            <th>Temp (°C)</th>
+            <th>SpO₂ (%)</th>
+            <th>Classification</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if readings %}
+            {% for r in readings %}
+              <tr>
+                <td style="font-family: var(--font-mono); font-weight: 700; color: var(--text-dim);">#{{ r.id }}</td>
+                <td style="font-family: var(--font-mono); font-size: 0.82rem;">{{ r.timestamp }}</td>
+                <td><span style="font-size: 0.78rem; font-family: var(--font-mono); background: var(--bg-surface-elevated); padding: 3px 7px; border-radius: 4px;">{{ r.device_id or 'ESP32-Sepsis-01' }}</span></td>
+                <td style="font-weight: 700;">{{ r.bpm|round(1) if r.bpm else '—' }}</td>
+                <td>{{ r.temperature|round(1) if r.temperature else '—' }}°</td>
+                <td>{{ r.spo2|round(1) if r.spo2 else '—' }}%</td>
+                <td>
+                  {% if r.prediction == 'SEPSIS_RISK_FLAG' %}
+                    <span class="badge-risk">SEPSIS_RISK_FLAG</span>
+                  {% elif r.prediction == 'NO_RISK_FLAG' %}
+                    <span class="badge-normal">NO_RISK_FLAG</span>
+                  {% else %}
+                    <span class="pill">{{ r.prediction or 'NO_FLAG' }}</span>
+                  {% endif %}
+                </td>
+                <td style="font-family: var(--font-mono); font-size: 0.82rem;">
+                  {{ (r.sepsis_probability * 100)|round(2) if r.sepsis_probability is not none else '0.00' }}%
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                No readings recorded matching the selected filter criteria.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+      <div style="display: flex; justify-content: center; gap: 8px; margin-top: 24px;">
+        {% for p in range(1, total_pages + 1) %}
+          <a href="{{ url_for('app_history', page=p, risk=risk_filter) }}" 
+             class="btn btn-small {% if p == current_page %}btn-primary{% else %}btn-ghost{% endif %}">
+            {{ p }}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
