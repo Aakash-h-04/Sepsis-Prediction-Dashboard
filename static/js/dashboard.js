@@ -2,7 +2,7 @@
 "use strict";
 
 const API_URL = "/api/readings";
-const REFRESH_INTERVAL = 3000;
+const REFRESH_INTERVAL = 1000;
 
 let vitalsChart = null;
 
